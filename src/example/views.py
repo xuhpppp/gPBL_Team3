@@ -28,3 +28,11 @@ class ListPersonView(APIView):
             return JsonResponse({
                 'message': 'Create a new person unsuccessfully'
             }, status = status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request,khoachinh):
+        person = Person.objects.get(pk=khoachinh)
+        serializer = PersonSerializer(person, request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
