@@ -29,5 +29,14 @@ class ListPersonView(APIView):
                 'message': 'Create a new person unsuccessfully'
             }, status = status.HTTP_400_BAD_REQUEST)
         
+    def delete(self, request, *args, **kwargs):
+        login_user = request.user
+        if (login_user == "admin"):
+            person = self.get_object()
+            person.delete()
+            respon_messenge ={"massage" : "Item has been deleted"}
+        else:
+            respon_messenge = {"message" : "Not Allowed"}
+        return Response(respon_messenge) 
         
     
