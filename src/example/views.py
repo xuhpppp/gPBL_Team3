@@ -30,7 +30,7 @@ class ListPersonView(APIView):
             }, status = status.HTTP_400_BAD_REQUEST)
         
         
-    @api_view(['DELETE', ])
+    
     def delete(self, request, *args, **kwargs):
         serializer = PersonSerializer(data=request.data)
         try:
