@@ -31,17 +31,3 @@ class ListPersonView(APIView):
         
         
     
-    def delete(self, request, *args, **kwargs):
-        serializer = PersonSerializer(data=request.data)
-        try:
-             person = Person.objects.all()
-        except Person.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND )
-        if request.methot =='DELETE':
-            operation = Person.delete()
-            data = {}
-            if operation:
-                data["success"] = "delete successful"
-            else:
-                data["failure"] = "delete failed"
-            return Response(data=data)
