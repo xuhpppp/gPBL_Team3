@@ -32,7 +32,6 @@ class ListPersonView(APIView):
      def delete(self, request, format=None, id=None):
         try:
             person = Person.objects.get(pk=id)
-            if request.method =="DELETE":
                 person.delete()
             return Response({'massage' : 'massage deleted'})
         except exceptions.ObjectDoesNotExist:
