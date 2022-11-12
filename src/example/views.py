@@ -5,6 +5,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from django.core import exceptions
+
 from .models import Person
 from .serializers import PersonSerializer
 
