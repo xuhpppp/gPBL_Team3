@@ -32,6 +32,7 @@ class ListPersonView(APIView):
                 'message': 'Create a new person unsuccessfully'
             }, status = status.HTTP_400_BAD_REQUEST)
 
+<<<<<<< HEAD
     def delete(self, request, *args, **kwargs):
         person = get_object_or_404(Person, id=kwargs.get('pk'))
 
@@ -41,4 +42,22 @@ class ListPersonView(APIView):
             return JsonResponse({
                 'message': 'delete 1 person successfully'
             }, status = status.HTTP_200_OK)
+=======
+    def put(self, request, *args, **kwargs):
+        person = get_object_or_404(Person, id=kwargs.get('pk'))
+
+        if person is not None:
+            serializer = PersonSerializer(person, request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+
+                return JsonResponse({
+                    'message': 'update 1 person successfully'
+                }, status = status.HTTP_200_OK)
+            else:
+                return JsonResponse({
+                    'message': 'update 1 person unsuccessfully'
+                }, status = status.HTTP_200_OK)
+>>>>>>> namntd
 
