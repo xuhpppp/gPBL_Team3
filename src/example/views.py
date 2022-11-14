@@ -13,10 +13,20 @@ from .serializers import PersonSerializer
 
 # Create your views here.
 class ListPersonView(APIView):
-    def get(self, request, format=None):
-        person = Person.objects.all()
-        serializer = PersonSerializer(person, many=True)
-        return Response(serializer.data)
+    def get(self, request, *args, **kwargs):
+        id=kwargs.get('pk')
+        if id is None:
+            person = Person.objects.all()
+            serializer = PersonSerializer(person, many=True)
+            return Response(serializer.data)
+        else:
+            try:
+                person = Person.objects.get(pk=id)
+                serializer = PersonSerializer(person, many=False)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except exceptions.ObjectDoesNotExist:
+                return Response({'message':'Object does not exist'}, status=status.HTTP_204_NO_CONTENT)
+        
 
     def post(self, request, *args, **kwargs):
         serializer = PersonSerializer(data=request.data)
