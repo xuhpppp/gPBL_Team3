@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -29,10 +30,20 @@ class ListPersonView(APIView):
                 'message': 'Create a new person unsuccessfully'
             }, status = status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request,khoachinh):
-        person = Person.objects.get(pk=khoachinh)
-        serializer = PersonSerializer(person, request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+    def put(self, request, *args, **kwargs):
+        person = get_object_or_404(Person, id=kwargs.get('pk'))
+
+        if person is not None:
+            serializer = PersonSerializer(person, request.data)
+
+            if serializer.is_valid():
+                serializer.save()
+
+                return JsonResponse({
+                    'message': 'update 1 person successfully'
+                }, status = status.HTTP_200_OK)
+            else:
+                return JsonResponse({
+                    'message': 'update 1 person unsuccessfully'
+                }, status = status.HTTP_200_OK)
 
