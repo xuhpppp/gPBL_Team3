@@ -1,0 +1,27 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet'>
+    <title>Document</title>
+</head>
+<body>
+    <div class="login">
+        <img class="login-img" src="{% static 'images/icon_png.png' %}">
+
+        <p class="login-title">LOGIN</p>
+
+        <form class="login-form" method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+
+            <input type="text" name="email" placeholder="Type your email...">
+            <input type="password" name="password" placeholder="Type your password...">
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</body>
+</html>
