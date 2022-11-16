@@ -31,6 +31,14 @@ def check_password_standardized(password):
     else:
         return False
 
+class CustomIsAdminUser(IsAdminUser):
+    """
+    Allows access only to admin users.
+    """
+
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_admin)
+
 # Create your views here.
 class UserRegister(APIView):
     def post(self, request):
@@ -87,7 +95,7 @@ class UserLogin(APIView):
 
 #@permission_classes([IsAuthenticated])
 class TestView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated, CustomIsAdminUser]
     #IsAdminUser is customized
 
     def get(self, request):
