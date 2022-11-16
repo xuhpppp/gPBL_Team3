@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
-
+from .views import ListPersonView
 urlpatterns = [
     path('', views.ListPersonView.as_view(), name='API to get list of person'),
-    path('<str:id>', views.ListPersonView.as_view(), name='detail_person'),
+    path('<int:pk>', views.ListPersonView.as_view())
 ]
