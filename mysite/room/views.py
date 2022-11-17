@@ -46,7 +46,7 @@ class OrderTask(APIView):
             now = datetime.now()
             start = datetime.strptime(mutable_data['start_time'], "%Y-%m-%d %H:%M")
             end = datetime.strptime(mutable_data['end_time'], "%Y-%m-%d %H:%M")
-            print(start)
+
             if end <= start:
                 return JsonResponse({
                     'message': 'End time must be after start time'
@@ -67,7 +67,7 @@ class OrderTask(APIView):
             start = start - timedelta(hours = 7)
             end = end.replace(tzinfo=utc)
             end = end - timedelta(hours = 7)
-            #change logic here...
+
             for roomorder in list_of_RoomOrder:
                 if (start >= roomorder.start_time and start <= roomorder.end_time) or (end >= roomorder.start_time and end <= roomorder.end_time) or (start <= roomorder.start_time and end >= roomorder.end_time):
                     duplicate_flag = 1
