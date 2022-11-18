@@ -57,15 +57,15 @@ class UserRegister(APIView):
                 else:
                     return JsonResponse({
                         'message': 'Your password must have length of 8 at least, and mixs with lowercase, uppercase and number/special characters'
-                    }, status = status.HTTP_400_BAD_REQUEST)
+                    }, status = status.HTTP_200_OK)
             else:
                 return JsonResponse({
                     'messeage': 'Password is incorrect!'
-                }, status = status.HTTP_400_BAD_REQUEST)
+                }, status = status.HTTP_200_OK)
 
         return JsonResponse({
             'message': 'This email already existed!'
-        }, status = status.HTTP_400_BAD_REQUEST)
+        }, status = status.HTTP_200_OK)
 
 class UserLogin(APIView):
     def get(self, request):
@@ -91,7 +91,7 @@ class UserLogin(APIView):
 
         return JsonResponse({
             'message': 'Wrong email or password!'
-        }, status = status.HTTP_400_BAD_REQUEST)
+        }, status = status.HTTP_401_UNAUTHORIZED)
 
 #@permission_classes([IsAuthenticated])
 class TestView(APIView):
