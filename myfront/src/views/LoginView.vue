@@ -9,18 +9,22 @@
             <input class="login-input-password" type="password" placeholder="Type your password..." v-model="password">
 
             <button class="login-input-button" @click="login_submit">Login</button>
+
+            <p class="login-input-msg" v-if="message">{{message}}</p>
         </div>
     </div>
 </template>
 
 <script>
+import router from '@/router'
 import VueCookies from 'vue-cookies'
 
 export default {
   data () {
     return {
       email: '',
-      password: ''
+      password: '',
+      message: ''
     }
   },
   methods: {
@@ -39,12 +43,12 @@ export default {
           const data = await response.json()
 
           if (response.status === 401) {
-            console.log(data)
-          } else {
-            console.log(data.access_token)
-
+            this.message = data.message
+          } else if (response.status === 200) {
             VueCookies.set('access_token', data.access_token, 60 * 5)
             VueCookies.set('refresh_token', data.refresh_token, 60 * 10)
+
+            router.push('/')
           }
         })
     }
@@ -155,5 +159,15 @@ export default {
       background-color: #4caf45;
       color: white;
       cursor: pointer;
+    }
+
+    .login-input-msg {
+      color : red;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 60%;
+      width: 100%;
+      text-align: center;
     }
 </style>

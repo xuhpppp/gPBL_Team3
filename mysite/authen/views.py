@@ -69,7 +69,10 @@ class UserRegister(APIView):
 
 class UserLogin(APIView):
     def get(self, request):
-        return render(request, 'authen/login.html')
+        return JsonResponse({
+            'full_name': request.user.full_name,
+            'is_admin': request.user.is_admin
+        }, status = status.HTTP_200_OK)
 
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
