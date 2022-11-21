@@ -34,6 +34,21 @@ from .models import RoomOrder
 class OrderTask(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        # use 'for' loop if number of rooms is large
+        room_101_list = list(RoomOrder.objects.all().filter(room_name='101').filter(start_time__lte=datetime.now()).filter(end_time__gte=datetime.now()))
+        room_201_list = list(RoomOrder.objects.all().filter(room_name='201').filter(start_time__lte=datetime.now()).filter(end_time__gte=datetime.now()))
+        room_301_list = list(RoomOrder.objects.all().filter(room_name='301').filter(start_time__lte=datetime.now()).filter(end_time__gte=datetime.now()))
+
+        room_condition = []
+        room_condition.append(len(room_101_list))
+        room_condition.append(len(room_201_list))
+        room_condition.append(len(room_301_list))
+
+        return JsonResponse({
+            'room_condition': room_condition
+        }, status = status.HTTP_200_OK)
+
     def post(self,request):
         mutable_data = {}
         mutable_data['room_name'] = request.data['room_name']

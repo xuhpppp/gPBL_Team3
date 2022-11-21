@@ -1,22 +1,26 @@
 <template>
   <NavBar :fullName="full_name"></NavBar>
-  <h1>{{ full_name }}</h1>
+  <RoomCondition :roomCondition="room_condition"></RoomCondition>
+  <h1>{{ room_condition[0] }}</h1>
 </template>
 
 <script>
 // @ is an alias to /src
 import NavBar from '@/components/NavBar.vue'
+import RoomCondition from '@/components/RoomCondition.vue'
 import router from '@/router'
 import VueCookies from 'vue-cookies'
 
 export default {
   name: 'HomeView',
   components: {
-    NavBar
+    NavBar,
+    RoomCondition
   },
   data () {
     return {
-      full_name: ''
+      full_name: '',
+      room_condition: []
     }
   },
   created () {
@@ -28,7 +32,7 @@ export default {
       })
     }
 
-    const getUserData = {
+    const getHomeData = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -53,12 +57,23 @@ export default {
           })
       }
     } else {
-      fetch('http://127.0.0.1:8000/authen/login', getUserData)
+      fetch('http://127.0.0.1:8000/authen/login', getHomeData)
         .then(async response => {
           const data = await response.json()
 
           if (response.status === 200) {
             this.full_name = data.full_name
+          } else {
+            router.push('/login')
+          }
+        })
+
+      fetch('http://127.0.0.1:8000/room/order', getHomeData)
+        .then(async response => {
+          const data = await response.json()
+
+          if (response.status === 200) {
+            this.room_condition = data.room_condition
           } else {
             router.push('/login')
           }
