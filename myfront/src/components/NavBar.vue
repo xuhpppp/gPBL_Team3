@@ -1,62 +1,54 @@
 <template>
-    <h1>{{ full_name }}</h1>
+    <div class="navbar">
+      <font-awesome-icon icon="fa-solid fa-address-card" class="navbar-icon" />
+
+      <div class="navbar-text">
+        <h1 class="navbar-text-welcome">Welcome</h1>
+
+        <h1 class="navbar-text-fullname">{{ fullName }}</h1>
+      </div>
+    </div>
 </template>
 
 <script>
-import router from '@/router'
-import VueCookies from 'vue-cookies'
-
 export default {
-  data () {
-    return {
-      full_name: ''
-    }
-  },
-  created () {
-    const refreshToken = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        refresh: VueCookies.get('refresh_token')
-      })
-    }
-
-    const getUserData = {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + VueCookies.get('access_token')
-      }
-    }
-
-    if (VueCookies.get('access_token') === null) {
-      if (VueCookies.get('refresh_token') === null) {
-        router.push('/login')
-      } else {
-        fetch('http://127.0.0.1:8000/authen/refresh-token', refreshToken)
-          .then(async response => {
-            const data = await response.json()
-
-            if (response.status === 200) {
-              VueCookies.set('access_token', data.access, 60 * 5)
-              location.reload()
-            } else {
-              router.push('/login')
-            }
-          })
-      }
-    } else {
-      fetch('http://127.0.0.1:8000/authen/login', getUserData)
-        .then(async response => {
-          const data = await response.json()
-
-          if (response.status === 200) {
-            this.full_name = data.full_name
-          } else {
-            router.push('/login')
-          }
-        })
-    }
+  props: {
+    fullName: String
   }
 }
 </script>
+
+<style scoped>
+  @import url('https://fonts.googleapis.com/css2?family=Quicksand');
+
+  .navbar {
+    font-family: 'Quicksand', sans-serif;
+    background-color: white;
+    position: absolute;
+    display: flex;
+    width: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 24px;
+    height: 144px;
+    margin-top: 40px;
+  }
+
+  .navbar-icon {
+    font-size: 60px;
+    position: absolute;
+    top: 50%;
+    left: 15%;
+    transform: translate(-50%, -50%);
+  }
+
+  .navbar-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .navbar-text-fullname {
+    color: #57bb55;
+  }
+</style>

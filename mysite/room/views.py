@@ -72,17 +72,17 @@ class OrderTask(APIView):
                 if (start >= roomorder.start_time and start <= roomorder.end_time) or (end >= roomorder.start_time and end <= roomorder.end_time) or (start <= roomorder.start_time and end >= roomorder.end_time):
                     duplicate_flag = 1
                     break
-                else:
-                    serializer.save()
 
             if duplicate_flag == 1:
                 return JsonResponse({
                     'message': 'There is also an order at this time in this room!'
                 }, status = status.HTTP_400_BAD_REQUEST)
-            
-            return JsonResponse({
-                'message': 'Ordered successfully!'
-            }, status = status.HTTP_200_OK)
+            else:
+                serializer.save()
+
+                return JsonResponse({
+                    'message': 'Ordered successfully!'
+                }, status = status.HTTP_200_OK)
         else:
             return JsonResponse({
                 'message': 'Something wrong!'
