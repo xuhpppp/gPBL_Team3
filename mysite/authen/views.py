@@ -96,6 +96,17 @@ class UserLogin(APIView):
             'message': 'Wrong email or password!'
         }, status = status.HTTP_401_UNAUTHORIZED)
 
+class UserLogout(APIView):
+    # logout by re-create new token
+    def get(self, request):
+        if request.user != None:
+            refresh = TokenObtainPairSerializer.get_token(request.user)
+
+        return JsonResponse({
+            'message': 'Logout!'
+        }, status = status.HTTP_200_OK)
+    # https://stackoverflow.com/questions/52431850/logout-django-rest-framework-jwt
+
 #@permission_classes([IsAuthenticated])
 class TestView(APIView):
     permission_classes = [IsAuthenticated, CustomIsAdminUser]

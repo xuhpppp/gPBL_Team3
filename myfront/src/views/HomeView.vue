@@ -1,13 +1,14 @@
 <template>
   <NavBar :fullName="full_name"></NavBar>
   <RoomCondition :roomCondition="room_condition"></RoomCondition>
-  <h1>{{ room_condition[0] }}</h1>
+  <OptionMenu :isAdmin="is_admin"></OptionMenu>
 </template>
 
 <script>
 // @ is an alias to /src
 import NavBar from '@/components/NavBar.vue'
 import RoomCondition from '@/components/RoomCondition.vue'
+import OptionMenu from '@/components/OptionMenu.vue'
 import router from '@/router'
 import VueCookies from 'vue-cookies'
 
@@ -15,11 +16,13 @@ export default {
   name: 'HomeView',
   components: {
     NavBar,
-    RoomCondition
+    RoomCondition,
+    OptionMenu
   },
   data () {
     return {
       full_name: '',
+      is_admin: false,
       room_condition: []
     }
   },
@@ -63,6 +66,7 @@ export default {
 
           if (response.status === 200) {
             this.full_name = data.full_name
+            this.is_admin = data.is_admin
           } else {
             router.push('/login')
           }
