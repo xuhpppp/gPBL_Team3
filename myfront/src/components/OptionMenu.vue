@@ -1,34 +1,29 @@
 <template>
     <div class="option">
-        <button class="option-button">
-            <font-awesome-icon icon="fa-solid fa-calendar-days option-button-icon" />
-            <p class="option-button-text">My order</p>
-        </button>
-
-        <button class="option-button" v-if="isAdmin == true">
-            <font-awesome-icon icon="fa-solid fa-list-check option-button-icon" />
+        <a class="option-button" href="/order">
+            <font-awesome-icon class="option-button-icon" icon="fa-solid fa-calendar-days" />
             <p class="option-button-text">Order management</p>
-        </button>
+        </a>
 
-        <button class="option-button" v-if="isAdmin == true">
-            <font-awesome-icon icon="fa-solid fa-video option-button-icon" />
+        <a class="option-button" v-if="isAdmin == true">
+            <font-awesome-icon class="option-button-icon" icon="fa-solid fa-video" />
             <p class="option-button-text">Spectate rooms</p>
-        </button>
+        </a>
 
-        <button class="option-button" v-if="isAdmin == true">
-            <font-awesome-icon icon="fa-solid fa-user-plus option-button-icon" />
+        <a class="option-button" v-if="isAdmin == true">
+            <font-awesome-icon class="option-button-icon" icon="fa-solid fa-user-plus" />
             <p class="option-button-text">Register new user</p>
-        </button>
+        </a>
 
-        <button class="option-button">
-            <font-awesome-icon icon="fa-solid fa-key option-button-icon" />
+        <a class="option-button">
+            <font-awesome-icon class="option-button-icon" icon="fa-solid fa-key" />
             <p class="option-button-text">Change password</p>
-        </button>
+        </a>
 
-        <button class="option-button" @click="logout">
-            <font-awesome-icon icon="fa-solid fa-power-off option-button-icon" />
+        <a class="option-button" @click="logout">
+            <font-awesome-icon class="option-button-icon" icon="fa-solid fa-power-off" />
             <p class="option-button-text">Log out</p>
-        </button>
+        </a>
     </div>
 </template>
 
@@ -70,9 +65,44 @@ export default {
 
   .option {
     position: absolute;
-    width: 1000px;
+    width: 80%;
     left: 50%;
     transform: translateX(-50%);
-    background-color: rebeccapurple;
+    font-family: 'Quicksand', sans-serif;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin-top: 650px;
+  }
+
+  .option-button {
+    width: 400px;
+    height: 70px;
+    border-radius: 34px;
+    border: none;
+    display: flex;
+    align-items: center;
+    padding-left: 80px;
+    margin-bottom: 60px;
+    cursor: pointer;
+    background-color: white;
+    text-decoration: none;
+    color: black;
+  }
+
+  .option-button:hover {
+    transition: 0.3s;
+    background-color: #57bb55;
+    color: white;
+  }
+
+  .option-button-icon {
+    font-size: 34px;
+  }
+
+  .option-button-text {
+    font-size: 20px;
+    font-weight: 600;
+    margin-left: 20px;
   }
 </style>

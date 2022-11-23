@@ -37,8 +37,7 @@ export default {
     margin-top: 280px;
     left: 50%;
     transform: translateX(-50%);
-    width: 1200px;
-    height: 260px;
+    width: 70%;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
@@ -56,5 +55,11 @@ export default {
 
   .room-info-condition {
     font-size: 20px;
+  }
+
+  @media (max-width: 1280px) {
+    .room {
+      width: 100%;
+    }
   }
 </style>

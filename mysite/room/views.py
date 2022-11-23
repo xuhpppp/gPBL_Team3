@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import pytz
 
 from django.http import JsonResponse
 
@@ -74,17 +73,16 @@ class OrderTask(APIView):
                 }, status = status.HTTP_400_BAD_REQUEST)
 
             list_of_RoomOrder = RoomOrder.objects.all().filter(room_name=mutable_data['room_name']).filter(start_time__gt=datetime.now())
+            serializer_tocheck = RoomOrderSerializer(list_of_RoomOrder, many=True)
             #filter time here...
             duplicate_flag = 0
-            utc=pytz.UTC
-            #some bug about UTC timezone
-            start = start.replace(tzinfo=utc)
-            start = start - timedelta(hours = 7)
-            end = end.replace(tzinfo=utc)
-            end = end - timedelta(hours = 7)
 
-            for roomorder in list_of_RoomOrder:
-                if (start >= roomorder.start_time and start <= roomorder.end_time) or (end >= roomorder.start_time and end <= roomorder.end_time) or (start <= roomorder.start_time and end >= roomorder.end_time):
+            for roomorder in serializer_tocheck.data:
+                model_temp = dict(roomorder)   
+                model_start_time = datetime.strptime(model_temp['start_time'][:16].replace('T', ' '), '%Y-%m-%d %H:%M')
+                model_end_time = datetime.strptime(model_temp['end_time'][:16].replace('T', ' '), '%Y-%m-%d %H:%M')
+
+                if (start >= model_start_time and start <= model_end_time) or (end >= model_start_time and end <= model_end_time) or (start <= model_start_time  and end >= model_end_time):
                     duplicate_flag = 1
                     break
 
@@ -96,9 +94,26 @@ class OrderTask(APIView):
                 serializer.save()
 
                 return JsonResponse({
-                    'message': 'Ordered successfully!'
+                    'message': f"Ordered successfully for room {request.data['room_name']} from {request.data['start_time']} to {request.data['end_time']}",
+                    'full_name': request.user.full_name
                 }, status = status.HTTP_200_OK)
         else:
             return JsonResponse({
                 'message': 'Something wrong!'
             }, status = status.HTTP_400_BAD_REQUEST)
+
+class OrderList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        my_orders = RoomOrder.objects.all().select_related()
+        my_orders_user = []
+        for o in my_orders:
+            my_orders_user.append(o.user.full_name)
+
+        serializer = RoomOrderSerializer(my_orders, many=True)
+
+        return JsonResponse({
+           'order_list': serializer.data,
+           'order_list_user': my_orders_user
+        }, status = status.HTTP_200_OK)

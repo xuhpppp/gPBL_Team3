@@ -1,29 +1,23 @@
 <template>
-  <NavBar :fullName="full_name"></NavBar>
-  <RoomCondition :roomCondition="room_condition"></RoomCondition>
-  <OptionMenu :isAdmin="is_admin"></OptionMenu>
+    <NewOrder @inputData="updateOrder"></NewOrder>
+    <OrderList :orderList="order_list" :orderListUser="order_list_user"></OrderList>
 </template>
 
 <script>
-// @ is an alias to /src
-import NavBar from '@/components/NavBar.vue'
-import RoomCondition from '@/components/RoomCondition.vue'
-import OptionMenu from '@/components/OptionMenu.vue'
 import router from '@/router'
 import VueCookies from 'vue-cookies'
+import NewOrder from '@/components/NewOrder.vue'
+import OrderList from '@/components/OrderList.vue'
 
 export default {
-  name: 'HomeView',
   components: {
-    NavBar,
-    RoomCondition,
-    OptionMenu
+    NewOrder,
+    OrderList
   },
   data () {
     return {
-      full_name: '',
-      is_admin: false,
-      room_condition: []
+      order_list: [],
+      order_list_user: []
     }
   },
   created () {
@@ -35,7 +29,7 @@ export default {
       })
     }
 
-    const getHomeData = {
+    const getMyOrders = {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -60,38 +54,27 @@ export default {
           })
       }
     } else {
-      fetch('http://127.0.0.1:8000/authen/login', getHomeData)
+      fetch('http://127.0.0.1:8000/room/order-list', getMyOrders)
         .then(async response => {
           const data = await response.json()
 
           if (response.status === 200) {
-            this.full_name = data.full_name
-            this.is_admin = data.is_admin
+            this.order_list = data.order_list
+            this.order_list_user = data.order_list_user
+
+            this.order_list = this.order_list.reverse()
+            this.order_list_user = this.order_list_user.reverse()
           } else {
             router.push('/login')
           }
         })
-
-      fetch('http://127.0.0.1:8000/room/order', getHomeData)
-        .then(async response => {
-          const data = await response.json()
-
-          if (response.status === 200) {
-            this.room_condition = data.room_condition
-          } else {
-            router.push('/login')
-          }
-        })
+    }
+  },
+  methods: {
+    updateOrder (neworder) {
+      this.order_list.unshift(neworder)
+      this.order_list_user.unshift(neworder.user)
     }
   }
 }
 </script>
-
-<style scoped>
-  @media (max-width: 1280px) {
-    body {
-      background-color: white;
-      background-image: none;
-    }
-  }
-</style>
