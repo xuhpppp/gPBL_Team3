@@ -4,7 +4,7 @@ import router from './router'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { faAddressCard, faCalendarDays, faComputer, faKey, faListCheck, faPowerOff, faUserPlus, faVideo } from '@fortawesome/free-solid-svg-icons'
+import { faAddressCard, faCalendarDays, faComputer, faKey, faListCheck, faPowerOff, faRotate, faUserPlus, faVideo } from '@fortawesome/free-solid-svg-icons'
 
 library.add(faAddressCard,
   faComputer,
@@ -13,6 +13,7 @@ library.add(faAddressCard,
   faVideo,
   faUserPlus,
   faPowerOff,
-  faKey)
+  faKey,
+  faRotate)
 
 createApp(App).component('font-awesome-icon', FontAwesomeIcon).use(router).mount('#app')

@@ -1,31 +1,29 @@
 <template>
-    <div class="new">
-        <div class="new-form">
-            <h1 class="new-form-title">New order</h1>
+    <div class="detail">
+      <h1 class="detail-title">Order detail</h1>
 
-            <div class="new-form-room">
-                <p class="new-form-room-text">Room:</p>
-                <select class="new-form-room-select" v-model="room_name">
-                    <option>101</option>
-                    <option>201</option>
-                    <option>301</option>
-                </select>
-            </div>
+      <div class="detail-room">
+        <p class="detail-room-text">Room:</p>
+        <select class="detail-room-select" v-model="room_name">
+          <option>101</option>
+          <option>201</option>
+          <option>301</option>
+        </select>
+      </div>
 
-            <div class="new-form-start">
-                <p class="new-form-start-text">Start at:</p>
-                <input class="new-form-start-select" type="datetime-local" v-model="start_time"/>
-            </div>
+      <div class="detail-start">
+        <p class="detail-start-text">Start at:</p>
+        <input class="detail-start-select" type="datetime-local" v-model="start_time"/>
+      </div>
 
-            <div class="new-form-end">
-                <p class="new-form-end-text">End at:</p>
-                <input class="new-form-end-select" type="datetime-local" v-model="end_time"/>
-            </div>
+      <div class="detail-end">
+        <p class="detail-end-text">End at:</p>
+        <input class="detail-end-select" type="datetime-local" v-model="end_time"/>
+      </div>
 
-            <button class="new-form-button" @click="order_submit">Submit</button>
+      <button class="detail-button" @click="order_submit">Submit</button>
 
-            <p class="new-form-message" v-if="message">{{message}}</p>
-        </div>
+      <p class="detail-message" v-if="message">{{message}}</p>
     </div>
 </template>
 
@@ -34,25 +32,42 @@ import router from '@/router'
 import VueCookies from 'vue-cookies'
 
 export default {
+  created () {
+    const getDetailOrder = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + VueCookies.get('access_token')
+      }
+    }
+
+    fetch('http://127.0.0.1:8000/room/order-detail/' + this.$route.params.idRoomOrder, getDetailOrder)
+      .then(async response => {
+        const data = await response.json()
+
+        if (response.status === 404) {
+          router.push('/order')
+        } else if (response.status === 200) {
+          this.room_name = data.room_order.room_name
+          this.start_time = data.room_order.start_time.slice(0, 16)
+          this.end_time = data.room_order.end_time.slice(0, 16)
+        } else {
+          router.push('/login')
+        }
+      })
+  },
   data () {
     return {
       room_name: '',
       start_time: '',
       end_time: '',
-      message: '',
-      new_order: {
-        user: '',
-        room_name: this.room_name,
-        start_time: this.start_time,
-        end_time: this.end_time,
-        id: ''
-      }
+      message: ''
     }
   },
   methods: {
     order_submit () {
-      const createOrder = {
-        method: 'POST',
+      const editOrder = {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: 'Bearer ' + VueCookies.get('access_token')
@@ -64,7 +79,7 @@ export default {
         })
       }
 
-      fetch('http://127.0.0.1:8000/room/order', createOrder)
+      fetch('http://127.0.0.1:8000/room/order/' + this.$route.params.idRoomOrder, editOrder)
         .then(async response => {
           const data = await response.json()
 
@@ -72,16 +87,6 @@ export default {
             router.push('/login')
           } else {
             this.message = data.message
-
-            if (response.status === 200) {
-              // emit to update real-time
-              this.new_order.user = data.full_name
-              this.new_order.room_name = this.room_name
-              this.new_order.start_time = this.start_time
-              this.new_order.end_time = this.end_time
-              this.new_order.id = data.id
-              this.$emit('inputData', this.new_order)
-            }
           }
         })
     }
@@ -92,32 +97,20 @@ export default {
 <style scoped>
   @import url('https://fonts.googleapis.com/css2?family=Quicksand');
 
-  .new {
+  .detail {
     font-family: 'Quicksand', sans-serif;
+    text-align: center;
     position: relative;
-    height: 600px;
-    margin-top: 20px;
+    height: 580px;
   }
 
-  .new-form {
-    position: absolute;
-    display: flex;
-    flex-direction: column;
-    width: 70%;
-    left: 50%;
-    transform: translateX(-50%);
-    flex-wrap: wrap;
-    align-items: center;
-    border-radius: 26px;
-  }
-
-  .new-form-title {
+  .detail-title {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
   }
 
-  .new-form-room {
+  .detail-room {
     position: absolute;
     top: 80px;
     left: 50%;
@@ -125,12 +118,11 @@ export default {
     text-align: center;
   }
 
-  .new-form-room-text {
+  .detail-room-text {
     font-size: 20px;
     font-weight: 600;
   }
-
-  .new-form-room-select {
+  .detail-room-select {
     width: 200px;
     height: 40px;
     padding-left: 40%;
@@ -141,7 +133,7 @@ export default {
     font-size: 18px;
   }
 
-  .new-form-start {
+  .detail-start {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -149,12 +141,12 @@ export default {
     top: 200px;
   }
 
-  .new-form-start-text {
+  .detail-start-text {
     font-size: 20px;
     font-weight: 600;
   }
 
-  .new-form-start-select {
+  .detail-start-select {
     width: 250px;
     height: 40px;
     border-radius: 26px;
@@ -166,7 +158,7 @@ export default {
     font-size: 16px;
   }
 
-  .new-form-end {
+  .detail-end {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -174,12 +166,12 @@ export default {
     top: 320px;
   }
 
-  .new-form-end-text {
+  .detail-end-text {
     font-size: 20px;
     font-weight: 600;
   }
 
-  .new-form-end-select {
+  .detail-end-select {
     width: 250px;
     height: 40px;
     border-radius: 26px;
@@ -191,7 +183,7 @@ export default {
     font-size: 16px;
   }
 
-  .new-form-button {
+  .detail-button {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -203,13 +195,13 @@ export default {
     top: 480px;
   }
 
-  .new-form-button:hover {
+  .detail-button:hover {
     transition: 0.3s;
     background-color: green;
     color: white;
   }
 
-  .new-form-message {
+  .detail-message {
     position: absolute;
     color: red;
     left: 50%;

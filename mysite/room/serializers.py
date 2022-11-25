@@ -1,14 +1,14 @@
 from rest_framework import serializers
 
-from .models import RoomOrder, StaffListOrder
+from .models import RoomOrder, StaffOrder
 
 class RoomOrderSerializer(serializers.ModelSerializer):
     # start_time = serializers.DateTimeField()
     class Meta:
         model = RoomOrder
-        fields = ['user', 'room_name', 'start_time', 'end_time']
+        fields = ['user', 'room_name', 'start_time', 'end_time', 'id']
 
-class StaffListOrderSerializer(serializers.ModelSerializer):
+class StaffOrderSerializer(serializers.ModelSerializer):
     class Meta:
-        model = StaffListOrder
-        fields = ['id_RoomOrder', 'staff_email', 'staff_full_name']
+        model = StaffOrder
+        fields = ['roomOrder_id', 'user_id', 'joined']
