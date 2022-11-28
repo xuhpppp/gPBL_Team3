@@ -11,6 +11,6 @@ class RoomOrder(models.Model):
     end_time = models.DateTimeField()
 
 class StaffOrder(models.Model):
-    roomOrder_id = models.ForeignKey(RoomOrder, on_delete=models.CASCADE)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    roomOrder = models.ForeignKey(RoomOrder, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     joined = models.BooleanField(default=False)

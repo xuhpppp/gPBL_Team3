@@ -23,6 +23,8 @@
 
       <button class="detail-button" @click="order_submit">Submit</button>
 
+      <button class="detail-delete" @click="delete_submit">Delete this order</button>
+
       <p class="detail-message" v-if="message">{{message}}</p>
     </div>
 </template>
@@ -51,8 +53,6 @@ export default {
           this.room_name = data.room_order.room_name
           this.start_time = data.room_order.start_time.slice(0, 16)
           this.end_time = data.room_order.end_time.slice(0, 16)
-        } else {
-          router.push('/login')
         }
       })
   },
@@ -89,6 +89,28 @@ export default {
             this.message = data.message
           }
         })
+    },
+    delete_submit () {
+      const deleteOrder = {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + VueCookies.get('access_token')
+        }
+      }
+
+      fetch('http://127.0.0.1:8000/room/order/' + this.$route.params.idRoomOrder, deleteOrder)
+        .then(async response => {
+          const data = await response.json()
+
+          if (response.status === 401) {
+            router.push('/login')
+          } else if (response.status === 400) {
+            this.message = data.message
+          } else {
+            router.push('/order')
+          }
+        })
     }
   }
 }
@@ -101,7 +123,7 @@ export default {
     font-family: 'Quicksand', sans-serif;
     text-align: center;
     position: relative;
-    height: 580px;
+    height: 640px;
   }
 
   .detail-title {
@@ -201,6 +223,24 @@ export default {
     color: white;
   }
 
+  .detail-delete {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 30px;
+    border-radius: 24px;
+    border: none;
+    cursor: pointer;
+    top: 520px;
+  }
+
+  .detail-delete:hover {
+    transition: 0.3s;
+    background-color: red;
+    color: white;
+  }
+
   .detail-message {
     position: absolute;
     color: red;
@@ -208,6 +248,6 @@ export default {
     transform: translateX(-50%);
     font-size: 24px;
     font-weight: 600;
-    top: 500px;
+    top: 550px;
   }
 </style>

@@ -1,24 +1,18 @@
 <template>
   <EditOrder></EditOrder>
-    <div class="staff">
-      <h1 class="staff-title">List of staffs</h1>
-
-      <div class="staff-add">
-        <label class="staff-add-lable">Add a guess:</label>
-        <input class="staff-add-input" type="email" placeholder="Staff email...">
-        <button class="staff-add-button">Add</button>
-      </div>
-    </div>
+  <AddStaff></AddStaff>
 </template>
 
 <script>
 import router from '@/router'
 import VueCookies from 'vue-cookies'
 import EditOrder from '../components/EditOrder.vue'
+import AddStaff from '../components/AddStaff.vue'
 
 export default {
   components: {
-    EditOrder
+    EditOrder,
+    AddStaff
   },
   created () {
     const refreshToken = {
@@ -49,11 +43,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-  .staff {
-    font-family: 'Quicksand', sans-serif;
-    position: relative;
-    text-align: center;
-  }
-</style>

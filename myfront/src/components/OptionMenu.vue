@@ -10,6 +10,11 @@
             <p class="option-button-text">Spectate rooms</p>
         </a>
 
+        <a class="option-button">
+            <font-awesome-icon class="option-button-icon" icon="fa-solid fa-calendar-check" />
+            <p class="option-button-text">Check-in</p>
+        </a>
+
         <a class="option-button" v-if="isAdmin == true">
             <font-awesome-icon class="option-button-icon" icon="fa-solid fa-user-plus" />
             <p class="option-button-text">Register new user</p>
