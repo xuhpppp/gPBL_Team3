@@ -3,6 +3,7 @@ import pytz
 
 from django.http import JsonResponse
 
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import RoomOrderSerializer
@@ -41,7 +42,7 @@ class OrderTask(APIView):
         mutable_data['end_time'] = request.data['end_time']
         mutable_data['user'] = request.user.id
         
-        serializer = RoomOrderSerializer(data=mutable_data)
+        serializer = RoomOrderSerializer(data=mutable_data)  # type: ignore
         if serializer.is_valid():
             now = datetime.now()
             start = datetime.strptime(mutable_data['start_time'], "%Y-%m-%d %H:%M")
@@ -87,3 +88,23 @@ class OrderTask(APIView):
             return JsonResponse({
                 'message': 'Something wrong!'
             }, status = status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, pk=None):
+        if pk == None:
+            if request.user.is_admin:
+                data = RoomOrder.objects.all()
+            else:
+                data = RoomOrder.objects.filter(user_id=request.user.id)
+
+            serializer = RoomOrderSerializer(data, many=True)
+        else:
+            if request.user.is_admin:
+                data = RoomOrder.objects.get(pk=pk)
+            else:
+                data = RoomOrder.objects.filter(user_id=request.user.id).filter(pk=pk)
+
+            serializer = RoomOrderSerializer(data, many=False)
+
+
+        return Response(serializer.data)
+        

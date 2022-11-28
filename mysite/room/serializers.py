@@ -6,7 +6,7 @@ class RoomOrderSerializer(serializers.ModelSerializer):
     # start_time = serializers.DateTimeField()
     class Meta:
         model = RoomOrder
-        fields = ['user', 'room_name', 'start_time', 'end_time']
+        fields = ['room_name', 'start_time', 'end_time']
 
 class StaffListOrderSerializer(serializers.ModelSerializer):
     class Meta:
