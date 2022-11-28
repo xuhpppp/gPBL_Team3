@@ -191,7 +191,7 @@ def run(
                 image_bytes = cv2.imencode('.jpg', im0)[1].tobytes()
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + image_bytes + b'\r\n')
-                # cv2.waitKey(1)  # 1 millisecond
+                cv2.waitKey(1)  # 1 millisecond
 
         # Print time (inference-only)
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
