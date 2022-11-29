@@ -186,12 +186,11 @@ def run(
                     cv2.namedWindow(str(p), cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)  # allow window resize (Linux)
                     cv2.resizeWindow(str(p), im0.shape[1], im0.shape[0])
                 # cv2.imshow(str(p), im0)
-                # django to process here
-                im0 = annotator.result()    
+                # django to process here  
                 image_bytes = cv2.imencode('.jpg', im0)[1].tobytes()
                 yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + image_bytes + b'\r\n')
-                # cv2.waitKey(1)  # 1 millisecond
+                cv2.waitKey(1)  # 1 millisecond
 
         # Print time (inference-only)
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
@@ -208,7 +207,7 @@ def run(
 def video_feed(request):
     return StreamingHttpResponse(run(
         weights='yolov5s.pt',
-        source=0,
+        source='rtsp://admin:NWLHGA@192.168.0.104:554/H.264',
         data='data/coco128.yaml',
         imgsz=(320, 320),
         conf_thres=0.25,
