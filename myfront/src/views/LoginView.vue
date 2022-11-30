@@ -1,6 +1,6 @@
 <template>
     <div class="login">
-        <img class="login-img" src="../assets/icon_png.png" alt="">
+        <img class="login-img" src="" alt="">
 
         <div class="login-input">
             <h1 class="login-input-title">LOGIN</h1>
