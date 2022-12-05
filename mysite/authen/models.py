@@ -7,12 +7,11 @@ from django.contrib.auth.models import UserManager
 # Create your models here.
 class User(AbstractBaseUser):
     email = models.EmailField(max_length=255, unique=True)
-    password = models.TextField()
     full_name = models.CharField(max_length=100)
     is_admin = models.BooleanField()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['full_name', 'is_admin']
 
     objects = UserManager()
 

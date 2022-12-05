@@ -57,19 +57,22 @@ class UserRegister(APIView):
                 else:
                     return JsonResponse({
                         'message': 'Your password must have length of 8 at least, and mixs with lowercase, uppercase and number/special characters'
-                    }, status = status.HTTP_400_BAD_REQUEST)
+                    }, status = status.HTTP_200_OK)
             else:
                 return JsonResponse({
                     'messeage': 'Password is incorrect!'
-                }, status = status.HTTP_400_BAD_REQUEST)
+                }, status = status.HTTP_200_OK)
 
         return JsonResponse({
             'message': 'This email already existed!'
-        }, status = status.HTTP_400_BAD_REQUEST)
+        }, status = status.HTTP_200_OK)
 
 class UserLogin(APIView):
     def get(self, request):
-        return render(request, 'authen/login.html')
+        return JsonResponse({
+            'full_name': request.user.full_name,
+            'is_admin': request.user.is_admin
+        }, status = status.HTTP_200_OK)
 
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
@@ -91,7 +94,18 @@ class UserLogin(APIView):
 
         return JsonResponse({
             'message': 'Wrong email or password!'
-        }, status = status.HTTP_400_BAD_REQUEST)
+        }, status = status.HTTP_401_UNAUTHORIZED)
+
+class UserLogout(APIView):
+    # logout by re-create new token
+    def get(self, request):
+        if request.user != None:
+            refresh = TokenObtainPairSerializer.get_token(request.user)
+
+        return JsonResponse({
+            'message': 'Logout!'
+        }, status = status.HTTP_200_OK)
+    # https://stackoverflow.com/questions/52431850/logout-django-rest-framework-jwt
 
 #@permission_classes([IsAuthenticated])
 class TestView(APIView):
