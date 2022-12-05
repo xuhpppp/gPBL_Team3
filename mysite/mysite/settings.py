@@ -60,6 +60,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware'
 ]
 
+X_FRAME_OPTIONS = 'http://localhost:8080/'
+
 CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'mysite.urls'
