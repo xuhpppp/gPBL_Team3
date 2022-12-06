@@ -86,7 +86,7 @@ class UserLogin(APIView):
 
             if user:
                 refresh = TokenObtainPairSerializer.get_token(user)
-
+                print('>>>>>>>>>>>>>>',user.id)
                 return JsonResponse({
                     'access_token': str(refresh.access_token),
                     'refresh_token': str(refresh),
@@ -107,12 +107,15 @@ class UserLogout(APIView):
         }, status = status.HTTP_200_OK)
     # https://stackoverflow.com/questions/52431850/logout-django-rest-framework-jwt
 
-#@permission_classes([IsAuthenticated])
-class TestView(APIView):
-    permission_classes = [IsAuthenticated, CustomIsAdminUser]
-    #IsAdminUser is customized
+class CheckAdmin(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        if request.user.is_admin == False:
+            return JsonResponse({
+                'message': 'not admin'
+            }, status = status.HTTP_401_UNAUTHORIZED)
+
         return JsonResponse({
-            'message': 'this is a test msg'
+            'link_101': 'http://127.0.0.1:8000/video_feed/'
         }, status = status.HTTP_200_OK)

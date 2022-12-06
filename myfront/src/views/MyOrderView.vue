@@ -1,6 +1,7 @@
 <template>
-    <NewOrder @inputData="updateNewOrder"></NewOrder>
-    <OrderList :orderList="order_list" :orderListUser="order_list_user" :isHost="is_host" @inputData="filterOrder"></OrderList>
+  <NewOrder @inputData="updateNewOrder"></NewOrder>
+  <OrderList :orderList="order_list" :orderListUser="order_list_user" :isHost="is_host" @inputData="filterOrder">
+  </OrderList>
 </template>
 
 <script>
@@ -8,20 +9,21 @@ import router from '@/router'
 import VueCookies from 'vue-cookies'
 import NewOrder from '@/components/NewOrder.vue'
 import OrderList from '@/components/OrderList.vue'
+import commons from '@/commons'
 
 export default {
   components: {
     NewOrder,
     OrderList
   },
-  data () {
+  data() {
     return {
       order_list: [],
       order_list_user: [],
       is_host: []
     }
   },
-  created () {
+  created() {
     const refreshToken = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -42,7 +44,7 @@ export default {
       if (VueCookies.get('refresh_token') === null) {
         router.push('/login')
       } else {
-        fetch('http://127.0.0.1:8000/authen/refresh-token', refreshToken)
+        fetch(commons.API_URL + '/authen/refresh-token', refreshToken)
           .then(async response => {
             const data = await response.json()
 
@@ -55,7 +57,7 @@ export default {
           })
       }
     } else {
-      fetch('http://127.0.0.1:8000/room/order-list', getMyOrders)
+      fetch(commons.API_URL + '/room/order-list', getMyOrders)
         .then(async response => {
           const data = await response.json()
 
@@ -74,12 +76,12 @@ export default {
     }
   },
   methods: {
-    updateNewOrder (neworder) {
+    updateNewOrder(neworder) {
       this.order_list.unshift(neworder)
       this.order_list_user.unshift(neworder.user)
       this.is_host.unshift(1)
     },
-    filterOrder (neworderlist) {
+    filterOrder(neworderlist) {
       this.order_list = neworderlist.filtered_order_list.reverse()
       this.order_list_user = neworderlist.filtered_order_list_user.reverse()
       this.is_host = neworderlist.filtered_is_host.reverse()

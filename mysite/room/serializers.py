@@ -11,4 +11,4 @@ class RoomOrderSerializer(serializers.ModelSerializer):
 class StaffOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = StaffOrder
-        fields = ['roomOrder_id', 'user_id', 'joined']
+        fields = ['roomOrder', 'user', 'joined']

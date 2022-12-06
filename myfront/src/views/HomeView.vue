@@ -11,6 +11,7 @@ import RoomCondition from '@/components/RoomCondition.vue'
 import OptionMenu from '@/components/OptionMenu.vue'
 import router from '@/router'
 import VueCookies from 'vue-cookies'
+import commons from '@/commons'
 
 export default {
   name: 'HomeView',
@@ -19,17 +20,17 @@ export default {
     RoomCondition,
     OptionMenu
   },
-  data () {
+  data() {
     return {
       full_name: '',
       is_admin: false,
       room_condition: []
     }
   },
-  created () {
+  created() {
     const refreshToken = {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'a  pplication/json' },
       body: JSON.stringify({
         refresh: VueCookies.get('refresh_token')
       })
@@ -47,7 +48,7 @@ export default {
       if (VueCookies.get('refresh_token') === null) {
         router.push('/login')
       } else {
-        fetch('http://127.0.0.1:8000/authen/refresh-token', refreshToken)
+        fetch(commons.API_URL + '/authen/refresh-token', refreshToken)
           .then(async response => {
             const data = await response.json()
 
@@ -60,9 +61,10 @@ export default {
           })
       }
     } else {
-      fetch('http://127.0.0.1:8000/authen/login', getHomeData)
+      fetch(commons.API_URL + '/authen/login', getHomeData)
         .then(async response => {
           const data = await response.json()
+          console.log(data)
 
           if (response.status === 200) {
             this.full_name = data.full_name
@@ -72,7 +74,7 @@ export default {
           }
         })
 
-      fetch('http://127.0.0.1:8000/room/order', getHomeData)
+      fetch(commons.API_URL + '/room/order', getHomeData)
         .then(async response => {
           const data = await response.json()
 
@@ -88,10 +90,10 @@ export default {
 </script>
 
 <style scoped>
-  @media (max-width: 1280px) {
-    body {
-      background-color: white;
-      background-image: none;
-    }
+@media (max-width: 1280px) {
+  body {
+    background-color: white;
+    background-image: none;
   }
+}
 </style>

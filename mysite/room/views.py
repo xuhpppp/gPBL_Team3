@@ -10,7 +10,8 @@ from rest_framework import status
 from .serializers import RoomOrderSerializer, StaffOrderSerializer
 from rest_framework.permissions import IsAuthenticated
 
-from .models import RoomOrder
+from .models import RoomOrder, StaffOrder
+from authen.models import User
 
 # Create your views here.
 class OrderTask(APIView):
@@ -79,8 +80,8 @@ class OrderTask(APIView):
                 last_save_roomOrder = serializer.save()
 
                 staff_order = {}
-                staff_order['user_id'] = request.user.id
-                staff_order['roomOrder_id'] = last_save_roomOrder.pk
+                staff_order['user'] = request.user.id
+                staff_order['roomOrder'] = last_save_roomOrder.pk
 
                 staff_order_serializer = StaffOrderSerializer(data=staff_order)
                 if staff_order_serializer.is_valid():
@@ -166,7 +167,22 @@ class OrderTask(APIView):
                 print(serializer.data)
                 return JsonResponse({
                     'message': 'Something wrong!'
-                }, status = status.HTTP_400_BAD_REQUEST)        
+                }, status = status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        room_order = get_object_or_404(RoomOrder, id=kwargs.get('pk'))
+
+        if room_order is not None:
+            if request.user.id != room_order.user_id:
+                return JsonResponse({
+                    'message': "You don't enough hierarchy to do that!"
+                }, status = status.HTTP_400_BAD_REQUEST)
+            else:
+                room_order.delete()
+
+                return JsonResponse({
+                    'message': "Delete!"
+                }, status = status.HTTP_200_OK)
 
 class OrderList(APIView):
     permission_classes = [IsAuthenticated]
@@ -283,3 +299,57 @@ class OrderDetail(APIView):
             return JsonResponse({
                 'room_order': serializer.data
             }, status = status.HTTP_200_OK)
+
+class StaffList(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        staff_list = StaffOrder.objects.all().filter(roomOrder=kwargs.get('pk')).select_related()
+        serializer = StaffOrderSerializer(staff_list, many=True)
+
+        staff_full_name = []
+        for staff in staff_list:
+            staff_full_name.append(staff.user.full_name)
+
+        return JsonResponse({
+            'staff_list': serializer.data,
+            'staff_full_name': staff_full_name
+        }, status = status.HTTP_200_OK)
+    
+    def post(self, request, *args, **kwargs):
+        room_order = get_object_or_404(RoomOrder, id=kwargs.get("pk"))
+
+        if room_order is not None:
+            if request.user.id != room_order.user_id:
+                return JsonResponse({
+                    'message': "You don't enough hierarchy to do that!"
+                }, status = status.HTTP_400_BAD_REQUEST)
+            
+            staff = get_object_or_404(User, email=request.data['email'])
+            
+            if staff is not None:
+                staff_order = StaffOrder.objects.all().filter(roomOrder_id=kwargs.get("pk")).filter(user_id=staff.id)
+                if len(staff_order) > 0:
+                    return JsonResponse({
+                        'message': 'Already have this guest!'
+                    }, status = status.HTTP_400_BAD_REQUEST)
+                
+                mutable_data = {}
+                mutable_data['roomOrder'] = kwargs.get("pk")
+                mutable_data['user'] = staff.id
+                mutable_data['joined'] = False
+
+                serializer = StaffOrderSerializer(data=mutable_data)
+                if serializer.is_valid():
+                    
+                    last_serializer = serializer.save()
+                    print(1)
+                    return JsonResponse({
+                        'message': 'Add a guest successfully!',
+                        'staff_order': serializer.data,
+                        'full_name': staff.full_name
+                    }, status = status.HTTP_200_OK)
+                else:
+                    return JsonResponse({
+                        'message': 'Something wrong!'
+                    }, status = status.HTTP_400_BAD_REQUEST)
