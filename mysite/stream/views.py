@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import StreamingHttpResponse
+from threading import Thread
 
 # Create your views here.
 def index(request):
@@ -56,10 +57,10 @@ from utils.torch_utils import select_device, smart_inference_mode
 
 @smart_inference_mode()
 def run(
-        weights=ROOT / 'yolov5s.pt',  # model path or triton URL
-        source=ROOT / 'data/images',  # file/dir/URL/glob/screen/0(webcam)
-        data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
-        imgsz=(640, 640),  # inference size (height, width)
+        weights='yolov5s.pt',  # model path or triton URL
+        source= 0,  # file/dir/URL/glob/screen/0(webcam)
+        data='data/coco128.yaml',  # dataset.yaml path
+        imgsz=(320, 320),  # inference size (height, width)
         conf_thres=0.25,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=1000,  # maximum detections per image
@@ -68,16 +69,16 @@ def run(
         save_txt=False,  # save results to *.txt
         save_conf=False,  # save confidences in --save-txt labels
         save_crop=False,  # save cropped prediction boxes
-        nosave=False,  # do not save images/videos
-        classes=None,  # filter by class: --class 0, or --class 0 2 3
+        nosave=True,  # do not save images/videos
+        classes=0,  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
         augment=False,  # augmented inference
         visualize=False,  # visualize features
         update=False,  # update all models
-        project=ROOT / 'runs/detect',  # save results to project/name
+        project='runs/detect',  # save results to project/name
         name='exp',  # save results to project/name
         exist_ok=False,  # existing project/name ok, do not increment
-        line_thickness=3,  # bounding box thickness (pixels)
+        line_thickness=2,  # bounding box thickness (pixels)
         hide_labels=False,  # hide labels
         hide_conf=False,  # hide confidences
         half=False,  # use FP16 half-precision inference
@@ -194,43 +195,43 @@ def run(
 
         # Print time (inference-only)
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
-
+    
     # Print results
-    t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
-    LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
-    if save_txt or save_img:
-        s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-        LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
-    if update:
-        strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
+    # t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
+    # LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
+    # if save_txt or save_img:
+    #     s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
+    #     LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
+    # if update:
+    #     strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
 
 def video_feed(request):
-    return StreamingHttpResponse(run(
-        weights='yolov5s.pt',
-        source='rtsp://admin:NWLHGA@192.168.0.104:554/H.264',
-        data='data/coco128.yaml',
-        imgsz=(320, 320),
-        conf_thres=0.25,
-        iou_thres=0.45,
-        max_det=1000,
-        device='',
-        view_img=False,
-        save_txt=False,
-        save_conf=False,
-        save_crop=False,
-        nosave=True,
-        classes=0,
-        agnostic_nms=False,
-        augment=False,
-        visualize=False,
-        update=False,
-        project='runs/detect',
-        name='exp',
-        exist_ok=False,
-        line_thickness=2,
-        hide_labels=False,
-        hide_conf=False,
-        half=False,
-        dnn=False,
-        vid_stride=1
-    ), content_type='multipart/x-mixed-replace; boundary=frame')
+    return StreamingHttpResponse(streaming_content=run(), content_type='multipart/x-mixed-replace; boundary=frame')
+
+# run(weights='yolov5s.pt',
+#         source='rtsp://admin:NWLHGA@192.168.0.104:554/H.264',
+#         data='data/coco128.yaml',
+#         imgsz=(320, 320),
+#         conf_thres=0.25,
+#         iou_thres=0.45,
+#         max_det=1000,
+#         device='',
+#         view_img=False,
+#         save_txt=False,
+#         save_conf=False,
+#         save_crop=False,
+#         nosave=True,
+#         classes=0,
+#         agnostic_nms=False,
+#         augment=False,
+#         visualize=False,
+#         update=False,
+#         project='runs/detect',
+#         name='exp',
+#         exist_ok=False,
+#         line_thickness=2,
+#         hide_labels=False,
+#         hide_conf=False,
+#         half=False,
+#         dnn=False,
+#         vid_stride=1)
