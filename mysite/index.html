@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <img src="http://127.0.0.1:8000/detect/" alt="">
+        <!-- <div>
+            Count : 
+            <b id="count"></b>
+             person
+            <br>
+            <button onclick="handleClick()">
+                Close
+            </button>
+        </div> -->
+    </div>
+
+    <!-- <script>
+        var socket = new WebSocket('ws://127.0.0.1:8000/ws/detect')
+            socket.onmessage = e => {
+                var data = JSON.parse(e.data)
+                console.log(data);
+                document.querySelector('#count').innerText = data.message || data.count_persons
+            } 
+        const handleClick = () => {
+            console.log('Close');
+            socket.close()
+        }
+    </script> -->
+</body>
+</html>

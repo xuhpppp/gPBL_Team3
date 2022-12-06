@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('authen/', include('authen.urls')),
     path('room/', include('room.urls')),
+    path('detect/', include('detect_person.urls')),
     path('', include('stream.urls'))
 ]

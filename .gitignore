@@ -6,7 +6,8 @@ __pycache__/
 .DS_Store
 node_modules
 /dist
-
+yolov5s.pt
+mysite/yolov5s.pt
 
 # local env files
 .env.local
