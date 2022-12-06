@@ -5,7 +5,7 @@
             <p class="option-button-text">Order management</p>
         </a>
 
-        <a class="option-button" v-if="isAdmin == true">
+        <a class="option-button" v-if="isAdmin == true" href="/spectate">
             <font-awesome-icon class="option-button-icon" icon="fa-solid fa-video" />
             <p class="option-button-text">Spectate rooms</p>
         </a>
