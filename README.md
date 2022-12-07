@@ -5,3 +5,6 @@ This is a template to run Python with Flask on [mogenius](https://mogenius.com).
 - Read the docs: [docs.mogenius.com](https://docs.mogenius.com)
 - Join our Discord community: [discord.gg/WSxnFHr4qm](https://discord.gg/WSxnFHr4qm)
 - Submit your ideas: [feedback.mogenius.com](https://feedback.mogenius.com)
+
+Channels bug:
+It worked for me just to put LANGUAGE_SESSION_KEY = '_language' at the top of channels/auth.py as a workaround. Everything else is working fine for me on django master.
