@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'authen',
     'room',
-    'stream'
+    'stream',
+    'face-recognition'
 ]
 
 MIDDLEWARE = [
