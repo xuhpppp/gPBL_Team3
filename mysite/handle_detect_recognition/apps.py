@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class DetectPersonConfig(AppConfig):
+class HandleDetectRecognitionConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'detect_person'
+    name = 'handle_detect_recognition'
