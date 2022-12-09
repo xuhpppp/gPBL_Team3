@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .views import index
+from .views import CheckIn
 
 urlpatterns = [
-    path('', index)
+    path('check-in', CheckIn.as_view())
 ]

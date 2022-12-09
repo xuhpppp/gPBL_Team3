@@ -11,7 +11,9 @@ import numpy as np
 import os
 import cv2
 
-sys.path.insert(0, "yolov5_face")
+yolo_path = os.path.realpath(os.path.join(sys.path[0], 'face\\yolov5_face'))
+sys.path.insert(0, yolo_path)
+#import pdb; pdb.set_trace()
 from models.experimental import attempt_load
 from utils.datasets import letterbox
 from utils.general import check_img_size, non_max_suppression_face, scale_coords
@@ -24,12 +26,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # model = attempt_load("yolov5_face/yolov5s-face.pt", map_location=device)
 
 ## Case 2:
-model = attempt_load("yolov5_face/yolov5n-0.5.pt", map_location=device)
+model = attempt_load(yolo_path + "\\yolov5n-0.5.pt", map_location=device)
 
 # Get model recognition
 ## Case 1: 
-from insightface.insight_face import iresnet100
-weight = torch.load("insightface/resnet100_backbone.pth", map_location = device)
+from .insightface.insight_face import iresnet100
+weight = torch.load(yolo_path + "\\..\\insightface\\resnet100_backbone.pth", map_location = device)
 model_emb = iresnet100()
 
 ## Case 2: 
@@ -48,6 +50,9 @@ face_preprocess = transforms.Compose([
                                     ])
 
 isThread = True
+total_thread = 0
+online_users = []
+faces = 0
 score = 0
 name = None
 
@@ -145,7 +150,7 @@ def read_features(root_fearure_path = "static/feature/face_features.npz"):
 
 def recognition(face_image):
     global isThread, score, name
-    
+    start = time.time()
     # Get feature from face
     query_emb = (get_feature(face_image, training=False))
     
@@ -159,11 +164,11 @@ def recognition(face_image):
     name = images_names[id_min]
     isThread = True
     print("successful")
-
+    print(start - time.time())
 
 
 def main():
-    global isThread, score, name
+    global total_thread, online_users
     
     # Open camera 
     cap = cv2.VideoCapture(0)
@@ -183,46 +188,23 @@ def main():
         # Capture frame-by-frame
         _, frame = cap.read()
         
+        
+        if total_thread < 1:
+            total_thread += 1
+            thread = Thread(target=recognition_mutiple, args=(frame,))
+            thread.start()
         # Get faces
         bboxs, landmarks = get_face(frame)
-        h, w, c = frame.shape
+        # h, w, c = frame.shape
         
-        tl = 1 or round(0.002 * (h + w) / 2) + 1  # line/font thickness
-        clors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(0,255,255)]
+        # tl = 1 or round(0.002 * (h + w) / 2) + 1  # line/font thickness
+        # clors = [(255,0,0),(0,255,0),(0,0,255),(255,255,0),(0,255,255)]
         
-        # Get boxs
+        # # Get boxs
         for i in range(len(bboxs)):
-            # Get location face
+        #     # Get location face
             x1, y1, x2, y2 = bboxs[i]
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 146, 230), 2)
-            
-            # Landmarks
-            for x in range(5):
-                point_x = int(landmarks[i][2 * x])
-                point_y = int(landmarks[i][2 * x + 1])
-                cv2.circle(frame, (point_x, point_y), tl+1, clors[x], -1)
-            
-            # Get face from location
-            if isThread == True:
-                isThread = False
-                
-                # Recognition
-                face_image = frame[y1:y2, x1:x2]
-                thread = Thread(target=recognition, args=(face_image,))
-                thread.start()
-        
-            if name is None:
-                continue
-            else:
-                if score < 0.25:
-                    caption= "UN_KNOWN"
-                else:
-                    caption = f"{name.split('_')[0].upper()}:{score:.2f}"
-
-                t_size = cv2.getTextSize(caption, cv2.FONT_HERSHEY_PLAIN, 2, 2)[0]
-                
-                cv2.rectangle(frame, (x1, y1), (x1 + t_size[0], y1 + t_size[1]), (0, 146, 230), -1)
-                cv2.putText(frame, caption, (x1, y1 + t_size[1]), cv2.FONT_HERSHEY_PLAIN, 2, [255, 255, 255], 2)       
             
         
         # Count fps 
@@ -236,9 +218,10 @@ def main():
     
         if fps > 0:
             fps_label = "FPS: %.2f" % fps
-            cv2.putText(frame, fps_label, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            lable_msg = f"{fps_label} Online users: {','.join(online_users)}"
+            cv2.putText(frame, lable_msg, (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         
-        
+        print(online_users)
         video.write(frame)
         cv2.imshow("Face Recognition", frame)
         
@@ -250,6 +233,39 @@ def main():
     cap.release()
     cv2.destroyAllWindows()
     cv2.waitKey(0)
+
+
+def recognition_mutiple(image):
+    global total_thread, online_users, faces
+    # Get faces
+    bboxs, _ = get_face(image)
+    if faces != len(bboxs):
+        online_users.clear()
+    # Get boxs
+    for i in range(len(bboxs)):
+        # Get location face
+        x1, y1, x2, y2 = bboxs[i]
+
+        # Get face from location
+        face_image = image[y1:y2, x1:x2]
+        
+        # Get feature from face
+        query_emb = (get_feature(face_image, training=False))
+        
+        # Read features
+        images_names, images_embs = read_features()   
+        
+        scores = (query_emb @ images_embs.T)[0]
+
+        id_min = np.argmax(scores)
+        score = scores[id_min]
+        name = images_names[id_min]
+        if score > 0.2 and name not in online_users:
+            online_users.append(name)
+
+    faces = len(bboxs)
+    total_thread -= 1
+    return image
 
 if __name__=="__main__":
     main()

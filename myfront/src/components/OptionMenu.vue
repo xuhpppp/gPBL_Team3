@@ -10,9 +10,14 @@
             <p class="option-button-text">Spectate rooms</p>
         </a>
 
-        <a class="option-button">
+        <a class="option-button" href="/face">
             <font-awesome-icon class="option-button-icon" icon="fa-solid fa-calendar-check" />
             <p class="option-button-text">Check-in</p>
+        </a>
+
+        <a class="option-button">
+            <font-awesome-icon class="option-button-icon" icon="fa-solid fa-face-smile" />
+            <p class="option-button-text">Insert dataset</p>
         </a>
 
         <a class="option-button" v-if="isAdmin == true">

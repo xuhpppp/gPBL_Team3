@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'authen',
     'room',
     'stream',
-    'facerecognition',
+    'face',
     'channels'
 ]
 
