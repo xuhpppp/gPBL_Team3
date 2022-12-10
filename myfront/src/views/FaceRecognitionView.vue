@@ -79,6 +79,7 @@ export default {
           }
 
           if (diffFlag === 1) {
+            self.message = ''
             self.recognize_process = 0
             checkInAPI = 0
           } else {
@@ -112,6 +113,7 @@ export default {
             }
           }
         } else {
+          self.message = ''
           self.recognize_process = 0
           checkInAPI = 0
         }

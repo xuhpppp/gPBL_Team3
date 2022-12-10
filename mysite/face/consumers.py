@@ -1,5 +1,7 @@
 from channels.generic.websocket import WebsocketConsumer
 
+from django.shortcuts import get_object_or_404
+
 #pytorch
 from concurrent.futures import thread
 import torch
@@ -13,8 +15,10 @@ from datetime import datetime
 import sys
 import numpy as np
 import os
+import shutil
 import cv2
 
+from authen.models import User
 from room.models import RoomOrder
 from room.serializers import RoomOrderSerializer
 sys.path.append("..")
@@ -215,7 +219,7 @@ def recognition_mutiple(image):
     total_thread -= 1
     return image
 
-class WSConsumer(WebsocketConsumer):
+class RecognizeConsumer(WebsocketConsumer):
     def main(self):
         global total_thread, online_users, stop
         
@@ -311,10 +315,187 @@ class WSConsumer(WebsocketConsumer):
         recognize_thread = Thread(target=self.main)
         recognize_thread.start()
 
-    def receive(self, text_data):
-        pass
-
     def disconnect(self, code):
         global stop
         stop = 1
+        print('close')
+
+def capture_frame():
+    global stop
+    # for re-opening camera
+    stop = 0
+    cap = cv2.VideoCapture(0)
+
+    count = 0
+    while stop == 0:
+        _, frame = cap.read()
+
+        cv2.imshow('Scanning', frame)
+
+        if count % 10 == 0:
+            cv2.imwrite('mysite\\face\\scan-result\\' + str(count) + '.jpg', frame)
+        count += 1
+
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            break
+    
+    cap.release()
+    cv2.destroyAllWindows()
+    cv2.waitKey(0)
+
+s1 = u'ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝàáâãèéêìíòóôõùúýĂăĐđĨĩŨũƠơƯưẠạẢảẤấẦầẨẩẪẫẬậẮắẰằẲẳẴẵẶặẸẹẺẻẼẽẾếỀềỂểỄễỆệỈỉỊịỌọỎỏỐốỒồỔổỖỗỘộỚớỜờỞởỠỡỢợỤụỦủỨứỪừỬửỮữỰựỲỳỴỵỶỷỸỹ'
+s0 = u'AAAAEEEIIOOOOUUYaaaaeeeiioooouuyAaDdIiUuOoUuAaAaAaAaAaAaAaAaAaAaAaAaEeEeEeEeEeEeEeEeIiIiOoOoOoOoOoOoOoOoOoOoOoOoUuUuUuUuUuUuUuYyYyYyYy'
+def remove_accents(input_str):
+	s = ''
+	for c in input_str:
+		if c in s1:
+			s += s0[s1.index(c)]
+		else:
+			s += c
+	return s
+
+def get_face_training(input_image):
+    # Parameters
+    size_convert = 256
+    conf_thres = 0.4
+    iou_thres = 0.5
+    
+    # Resize image
+    img = resize_image(input_image.copy(), size_convert)
+
+    # Via yolov5-face
+    with torch.no_grad():
+        pred = model(img[None, :])[0]
+
+    # Apply NMS
+    det = non_max_suppression_face(pred, conf_thres, iou_thres)[0]
+    bboxs = np.int32(scale_coords(img.shape[1:], det[:, :4], input_image.shape).round().cpu().numpy())
+    
+    return bboxs
+
+def read_features_training(root_fearure_path = yolo_path + "\\..\\static\\feature\\face_features.npz"):
+    try:
+        data = np.load(root_fearure_path + ".npz", allow_pickle=True)
+        images_name = data["arr1"]
+        images_emb = data["arr2"]
+        
+        return images_name, images_emb
+    except:
+        return None
+
+def training(full_training_dir='mysite\\face\\database\\full-training-datasets\\',
+             additional_training_dir='mysite\\face\\database\\additional-training-datasets\\', 
+             faces_save_dir='mysite\\face\\database\\face-datasets\\',
+             features_save_dir='mysite\\face\\static\\feature\\face_features', 
+             is_add_user=True):
+    
+    # Init results output
+    images_name = []
+    images_emb = []
+    
+    # Check mode full training or additidonal
+    if is_add_user == True:
+        source = additional_training_dir
+    else:
+        source = full_training_dir
+    
+    # Read train folder, get and save face 
+    for name_person in os.listdir(source):
+        person_image_path = os.path.join(source, name_person)
+        
+        # Create path save person face
+        person_face_path = os.path.join(faces_save_dir, name_person)
+        os.makedirs(person_face_path, exist_ok=True)
+        
+        for image_name in os.listdir(person_image_path):
+            if image_name.endswith(("png", 'jpg', 'jpeg')):
+                image_path = person_image_path + f"/{image_name}"
+                input_image = cv2.imread(image_path)  # BGR 
+
+                # Get faces
+                bboxs = get_face_training(input_image)
+
+                # Get boxs
+                for i in range(len(bboxs)):
+                    # Get number files in person path
+                    number_files = len(os.listdir(person_face_path))
+
+                    # Get location face
+                    x1, y1, x2, y2 = bboxs[i]
+
+                    # Get face from location
+                    face_image = input_image[y1:y2, x1:x2]
+
+                    # Path save face
+                    path_save_face = person_face_path + f"/{number_files}.jpg"
+                    
+                    # Save to face database 
+                    cv2.imwrite(path_save_face, face_image)
+                    
+                    # Get feature from face
+                    images_emb.append(get_feature(face_image, training=True))
+                    images_name.append(name_person)
+    
+    # Convert to array
+    images_emb = np.array(images_emb)
+    images_name = np.array(images_name)
+    
+    features = read_features_training(features_save_dir) 
+    if features is None or is_add_user== False:
+        pass
+    else:        
+        # Read features
+        old_images_name, old_images_emb = features  
+    
+        # Add feature and name of image to feature database
+        images_name = np.hstack((old_images_name, images_name))
+        images_emb = np.vstack((old_images_emb, images_emb))
+        
+        print("Update feature!")
+    
+    # Save features
+    np.savez_compressed(features_save_dir, 
+                        arr1 = images_name, arr2 = images_emb)
+    
+    # Move additional data to full train data
+    if is_add_user == True:
+        for sub_dir in os.listdir(additional_training_dir):
+            dir_to_move = os.path.join(additional_training_dir, sub_dir)
+            shutil.move(dir_to_move, full_training_dir, copy_function = shutil.copytree)
+
+    print('finish!')
+
+class InsertConsumer(WebsocketConsumer):
+    def connect(self):
+        self.accept()
+        
+        # capture frame
+        scanning_thread = Thread(target=capture_frame)
+        scanning_thread.start()
+
+    def receive(self, text_data):
+        user = get_object_or_404(User, id=text_data)
+
+        words = user.full_name.split(' ')
+        filename = remove_accents(words[-1])
+        for i in range(0, len(words) - 1):
+            filename += remove_accents(words[i])[0]
+        filename += '-' + str(user.id)
+
+        additional_path = os.path.realpath(os.path.join(sys.path[0], '..\\database\\additional-training-datasets\\' + filename))
+        if os.path.exists(additional_path) == False:
+            os.makedirs(additional_path)
+        
+        src_path = os.path.realpath(os.path.join(sys.path[0], '..\\scan-result'))
+        allfiles = os.listdir(src_path)
+        for f in allfiles:
+            shutil.move(os.path.join(src_path, f), os.path.join(additional_path, f))
+    
+    def disconnect(self, code):
+        global stop
+        stop = 1
+
+        training_thread = Thread(target=training)
+        training_thread.start()
+
         print('close')

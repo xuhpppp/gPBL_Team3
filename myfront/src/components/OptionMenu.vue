@@ -15,7 +15,7 @@
             <p class="option-button-text">Check-in</p>
         </a>
 
-        <a class="option-button">
+        <a class="option-button" href="/insert">
             <font-awesome-icon class="option-button-icon" icon="fa-solid fa-face-smile" />
             <p class="option-button-text">Insert dataset</p>
         </a>

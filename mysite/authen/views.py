@@ -71,7 +71,8 @@ class UserLogin(APIView):
     def get(self, request):
         return JsonResponse({
             'full_name': request.user.full_name,
-            'is_admin': request.user.is_admin
+            'is_admin': request.user.is_admin,
+            'id': request.user.id
         }, status = status.HTTP_200_OK)
 
     def post(self, request):
