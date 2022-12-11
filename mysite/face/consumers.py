@@ -383,89 +383,94 @@ def read_features_training(root_fearure_path = yolo_path + "\\..\\static\\featur
     except:
         return None
 
-def training(full_training_dir='mysite\\face\\database\\full-training-datasets\\',
+class InsertConsumer(WebsocketConsumer):
+    def training(self, 
+             full_training_dir='mysite\\face\\database\\full-training-datasets\\',
              additional_training_dir='mysite\\face\\database\\additional-training-datasets\\', 
              faces_save_dir='mysite\\face\\database\\face-datasets\\',
              features_save_dir='mysite\\face\\static\\feature\\face_features', 
              is_add_user=True):
     
-    # Init results output
-    images_name = []
-    images_emb = []
-    
-    # Check mode full training or additidonal
-    if is_add_user == True:
-        source = additional_training_dir
-    else:
-        source = full_training_dir
-    
-    # Read train folder, get and save face 
-    for name_person in os.listdir(source):
-        person_image_path = os.path.join(source, name_person)
+        # Init results output
+        images_name = []
+        images_emb = []
         
-        # Create path save person face
-        person_face_path = os.path.join(faces_save_dir, name_person)
-        os.makedirs(person_face_path, exist_ok=True)
+        # Check mode full training or additidonal
+        if is_add_user == True:
+            source = additional_training_dir
+        else:
+            source = full_training_dir
         
-        for image_name in os.listdir(person_image_path):
-            if image_name.endswith(("png", 'jpg', 'jpeg')):
-                image_path = person_image_path + f"/{image_name}"
-                input_image = cv2.imread(image_path)  # BGR 
+        # Read train folder, get and save face 
+        for name_person in os.listdir(source):
+            person_image_path = os.path.join(source, name_person)
+            
+            # Create path save person face
+            person_face_path = os.path.join(faces_save_dir, name_person)
+            os.makedirs(person_face_path, exist_ok=True)
+            
+            for image_name in os.listdir(person_image_path):
+                if image_name.endswith(("png", 'jpg', 'jpeg')):
+                    image_path = person_image_path + f"/{image_name}"
+                    input_image = cv2.imread(image_path)  # BGR 
 
-                # Get faces
-                bboxs = get_face_training(input_image)
+                    # Get faces
+                    bboxs = get_face_training(input_image)
 
-                # Get boxs
-                for i in range(len(bboxs)):
-                    # Get number files in person path
-                    number_files = len(os.listdir(person_face_path))
+                    # Get boxs
+                    for i in range(len(bboxs)):
+                        # Get number files in person path
+                        number_files = len(os.listdir(person_face_path))
 
-                    # Get location face
-                    x1, y1, x2, y2 = bboxs[i]
+                        # Get location face
+                        x1, y1, x2, y2 = bboxs[i]
 
-                    # Get face from location
-                    face_image = input_image[y1:y2, x1:x2]
+                        # Get face from location
+                        face_image = input_image[y1:y2, x1:x2]
 
-                    # Path save face
-                    path_save_face = person_face_path + f"/{number_files}.jpg"
-                    
-                    # Save to face database 
-                    cv2.imwrite(path_save_face, face_image)
-                    
-                    # Get feature from face
-                    images_emb.append(get_feature(face_image, training=True))
-                    images_name.append(name_person)
-    
-    # Convert to array
-    images_emb = np.array(images_emb)
-    images_name = np.array(images_name)
-    
-    features = read_features_training(features_save_dir) 
-    if features is None or is_add_user== False:
-        pass
-    else:        
-        # Read features
-        old_images_name, old_images_emb = features  
-    
-        # Add feature and name of image to feature database
-        images_name = np.hstack((old_images_name, images_name))
-        images_emb = np.vstack((old_images_emb, images_emb))
+                        # Path save face
+                        path_save_face = person_face_path + f"/{number_files}.jpg"
+                        
+                        # Save to face database 
+                        cv2.imwrite(path_save_face, face_image)
+                        
+                        # Get feature from face
+                        images_emb.append(get_feature(face_image, training=True))
+                        images_name.append(name_person)
         
-        print("Update feature!")
-    
-    # Save features
-    np.savez_compressed(features_save_dir, 
-                        arr1 = images_name, arr2 = images_emb)
-    
-    # Move additional data to full train data
-    if is_add_user == True:
-        for sub_dir in os.listdir(additional_training_dir):
-            dir_to_move = os.path.join(additional_training_dir, sub_dir)
-            shutil.move(dir_to_move, full_training_dir, copy_function = shutil.copytree)
+        # Convert to array
+        images_emb = np.array(images_emb)
+        images_name = np.array(images_name)
+        
+        features = read_features_training(features_save_dir) 
+        if features is None or is_add_user== False:
+            pass
+        else:        
+            # Read features
+            old_images_name, old_images_emb = features  
+        
+            # Add feature and name of image to feature database
+            images_name = np.hstack((old_images_name, images_name))
+            images_emb = np.vstack((old_images_emb, images_emb))
+            
+            print("Update feature!")
+        
+        # Save features
+        np.savez_compressed(features_save_dir, 
+                            arr1 = images_name, arr2 = images_emb)
+        
+        # Move additional data to full train data
+        if is_add_user == True:
+            for sub_dir in os.listdir(additional_training_dir):
+                dir_to_move = os.path.join(additional_training_dir, sub_dir)
+                shutil.move(dir_to_move, full_training_dir, copy_function = shutil.copytree)
 
-    print('finish!')
+        print('finish!')
 
-class InsertConsumer(WebsocketConsumer):
+        self.send(json.dumps({
+            'message': 'Finish adding your dataset'
+        }))
+
     def connect(self):
         self.accept()
         
@@ -474,6 +479,9 @@ class InsertConsumer(WebsocketConsumer):
         scanning_thread.start()
 
     def receive(self, text_data):
+        global stop
+        stop = 1
+
         user = get_object_or_404(User, id=text_data)
 
         words = user.full_name.split(' ')
@@ -490,12 +498,9 @@ class InsertConsumer(WebsocketConsumer):
         allfiles = os.listdir(src_path)
         for f in allfiles:
             shutil.move(os.path.join(src_path, f), os.path.join(additional_path, f))
+
+        training_thread = Thread(target=self.training)
+        training_thread.start()
     
     def disconnect(self, code):
-        global stop
-        stop = 1
-
-        training_thread = Thread(target=training)
-        training_thread.start()
-
         print('close')

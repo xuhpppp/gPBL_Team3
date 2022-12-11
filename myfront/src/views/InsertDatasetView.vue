@@ -55,9 +55,17 @@ export default {
   },
   methods: {
     startScanning () {
-      document.getElementsByClassName('time')[0].getElementsByClassName.style.opacity = 1
+      document.getElementsByClassName('time')[0].style.opacity = '1'
 
       const socket = new WebSocket('ws://localhost:8000/ws/insert')
+
+      socket.onmessage = function (event) {
+        var data = JSON.parse(event.data)
+
+        self.message = data.message
+
+        socket.close()
+      }
 
       const self = this
       // countdown 15sec to close socket
@@ -81,11 +89,8 @@ export default {
               const dataReceived = await response.json()
 
               if (response.status === 200) {
+                self.message = 'Please wait...'
                 socket.send(dataReceived.id)
-
-                self.message = 'Please wait about 5 minutes to finish adding dataset'
-
-                socket.close()
               } else {
                 router.push('/')
               }
