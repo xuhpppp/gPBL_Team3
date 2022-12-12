@@ -20,7 +20,7 @@
             <p class="option-button-text">Insert dataset</p>
         </a>
 
-        <a class="option-button" v-if="isAdmin == true">
+        <a class="option-button" v-if="isAdmin == true" href="/register">
             <font-awesome-icon class="option-button-icon" icon="fa-solid fa-user-plus" />
             <p class="option-button-text">Register new user</p>
         </a>

@@ -7,6 +7,7 @@ import SpectateView from '../views/SpectateView'
 import TestView from '../views/TestView'
 import FaceRecognitionView from '../views/FaceRecognitionView'
 import InsertDatasetView from '../views/InsertDatasetView'
+import RegisterUserView from '../views/RegisterUserView'
 
 const routes = [
   {
@@ -36,6 +37,10 @@ const routes = [
   {
     path: '/insert',
     component: InsertDatasetView
+  },
+  {
+    path: '/register',
+    component: RegisterUserView
   },
   {
     path: '/test',

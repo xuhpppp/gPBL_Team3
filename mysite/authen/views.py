@@ -60,7 +60,7 @@ class UserRegister(APIView):
                     }, status = status.HTTP_200_OK)
             else:
                 return JsonResponse({
-                    'messeage': 'Password is incorrect!'
+                    'message': 'Password is incorrect!'
                 }, status = status.HTTP_200_OK)
 
         return JsonResponse({
