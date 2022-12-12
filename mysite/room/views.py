@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime,timedelta
 
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -17,172 +17,80 @@ from authen.models import User
 class OrderTask(APIView):
     permission_classes = [IsAuthenticated]
 
-    # render condition
-    def get(self, request):
-        # use 'for' loop if number of rooms is large
-        room_101_list = list(RoomOrder.objects.all().filter(room_name='101').filter(start_time__lte=datetime.now()).filter(end_time__gte=datetime.now()))
-        room_201_list = list(RoomOrder.objects.all().filter(room_name='201').filter(start_time__lte=datetime.now()).filter(end_time__gte=datetime.now()))
-        room_301_list = list(RoomOrder.objects.all().filter(room_name='301').filter(start_time__lte=datetime.now()).filter(end_time__gte=datetime.now()))
-
-        room_condition = []
-        room_condition.append(len(room_101_list))
-        room_condition.append(len(room_201_list))
-        room_condition.append(len(room_301_list))
-
-        return JsonResponse({
-            'room_condition': room_condition
-        }, status = status.HTTP_200_OK)
-
-    # create new order
-    def post(self, request):
-        mutable_data = {}
-        mutable_data['room_name'] = request.data['room_name']
-        mutable_data['start_time'] = request.data['start_time']
-        mutable_data['end_time'] = request.data['end_time']
-        mutable_data['user'] = request.user.id
-        
-        serializer = RoomOrderSerializer(data=mutable_data)  # type: ignore
-        if serializer.is_valid():
-            now = datetime.now()
-            start = datetime.strptime(mutable_data['start_time'], "%Y-%m-%d %H:%M")
-            end = datetime.strptime(mutable_data['end_time'], "%Y-%m-%d %H:%M")
-
-            if end <= start:
-                return JsonResponse({
-                    'message': 'End time must be after start time'
-                }, status = status.HTTP_400_BAD_REQUEST)
-
-            delta = start - now
-            if (delta.total_seconds() / 60) < 15:
-                return JsonResponse({
-                    'message': 'You must order the room before use 15 minutes'
-                }, status = status.HTTP_400_BAD_REQUEST)
-
-            list_of_RoomOrder = RoomOrder.objects.all().filter(room_name=mutable_data['room_name']).filter(start_time__gt=datetime.now())
-            serializer_tocheck = RoomOrderSerializer(list_of_RoomOrder, many=True)
-            #filter time here...
-            duplicate_flag = 0
-
-            for roomorder in serializer_tocheck.data:
-                model_temp = dict(roomorder)
-                model_start_time = datetime.strptime(model_temp['start_time'][:16].replace('T', ' '), '%Y-%m-%d %H:%M')
-                model_end_time = datetime.strptime(model_temp['end_time'][:16].replace('T', ' '), '%Y-%m-%d %H:%M')
-
-                if (start >= model_start_time and start <= model_end_time) or (end >= model_start_time and end <= model_end_time) or (start <= model_start_time  and end >= model_end_time):
-                    duplicate_flag = 1
-                    break
-
-            if duplicate_flag == 1:
-                return JsonResponse({
-                    'message': 'There is also an order at this time in this room!'
-                }, status = status.HTTP_400_BAD_REQUEST)
+    def get(self, request, pk=None):
+        if pk == None:
+            if request.user.is_admin:
+                data = RoomOrder.objects.filter(
+                    start_time__gte=str(datetime.now()))
             else:
-                last_save_roomOrder = serializer.save()
-
-                staff_order = {}
-                staff_order['user'] = request.user.id
-                staff_order['roomOrder'] = last_save_roomOrder.pk
-
-                staff_order_serializer = StaffOrderSerializer(data=staff_order)
-                if staff_order_serializer.is_valid():
-                    staff_order_serializer.save()
-                
-                return JsonResponse({
-                    'message': f"Ordered successfully for room {request.data['room_name']} from {request.data['start_time']} to {request.data['end_time']}",
-                    'full_name': request.user.full_name,
-                    'id': last_save_roomOrder.pk
-                }, status = status.HTTP_200_OK)
+                data = RoomOrder.objects.filter(user_id=request.user.id).filter(
+                    start_time__gte=str(datetime.now()))
         else:
-            return JsonResponse({
-                'message': 'Something wrong!'
-            }, status = status.HTTP_400_BAD_REQUEST)
-    
-    # edit order
-    def put(self, request, *args, **kwargs):
-        room_order = get_object_or_404(RoomOrder, id=kwargs.get('pk'))
-
-        if room_order is not None:
-            serializer_obj = RoomOrderSerializer(room_order, many=False)
-            model_temp = dict(serializer_obj.data)
-            model_start_time = datetime.strptime(model_temp['start_time'][:16].replace('T', ' '), '%Y-%m-%d %H:%M')
-
-            if request.user.id != room_order.user_id:
-                return JsonResponse({
-                    'message': "You don't enough hierarchy to do that!"
-                }, status = status.HTTP_400_BAD_REQUEST)
-            
-            if model_start_time <= datetime.now():
-                return JsonResponse({
-                    'message': "You can only edit the order before it start!"
-                }, status = status.HTTP_400_BAD_REQUEST)
-            
-            mutable_data = {}
-            mutable_data['room_name'] = request.data['room_name']
-            mutable_data['start_time'] = request.data['start_time']
-            mutable_data['end_time'] = request.data['end_time']
-            mutable_data['user'] = request.user.id
-            serializer = RoomOrderSerializer(room_order, mutable_data)
-            if serializer.is_valid():
-                now = datetime.now()
-                start = datetime.strptime(request.data['start_time'], "%Y-%m-%d %H:%M")
-                end = datetime.strptime(request.data['end_time'], "%Y-%m-%d %H:%M")
-
-                if end <= start:
-                    return JsonResponse({
-                        'message': 'End time must be after start time'
-                    }, status = status.HTTP_400_BAD_REQUEST)
-
-                delta = start - now
-                if (delta.total_seconds() / 60) < 15:
-                    return JsonResponse({
-                        'message': 'You must order the room before use 15 minutes'
-                    }, status = status.HTTP_400_BAD_REQUEST)
-
-                list_of_RoomOrder = RoomOrder.objects.all().filter(~Q(id=kwargs.get('pk')))
-                serializer_tocheck = RoomOrderSerializer(list_of_RoomOrder, many=True)
-
-                #filter time here...
-                duplicate_flag = 0
-
-                for roomorder in serializer_tocheck.data:
-                    model_temp = dict(roomorder)
-                    model_start_time = datetime.strptime(model_temp['start_time'][:16].replace('T', ' '), '%Y-%m-%d %H:%M')
-                    model_end_time = datetime.strptime(model_temp['end_time'][:16].replace('T', ' '), '%Y-%m-%d %H:%M')
-
-                    if (start >= model_start_time and start <= model_end_time) or (end >= model_start_time and end <= model_end_time) or (start <= model_start_time  and end >= model_end_time):
-                        duplicate_flag = 1
-                        break
-
-                if duplicate_flag == 1:
-                    return JsonResponse({
-                        'message': 'There is also an order at this time in this room!'
-                    }, status = status.HTTP_400_BAD_REQUEST)
+            try:
+                if request.user.is_admin:
+                    data = RoomOrder.objects.filter(pk=pk).filter(
+                        start_time__gte=str(datetime.now()))
                 else:
-                    serializer.save()
-                
-                    return JsonResponse({
-                        'message': f"Change successfully to room {request.data['room_name']} from {request.data['start_time']} to {request.data['end_time']}",
-                    }, status = status.HTTP_200_OK)
-            else:
-                print(serializer.data)
-                return JsonResponse({
-                    'message': 'Something wrong!'
-                }, status = status.HTTP_400_BAD_REQUEST)
+                    data = RoomOrder.objects.filter(
+                        user_id=request.user.id).filter(pk=pk).filter(
+                        start_time__gte=str(datetime.now()))
+            except:
+                return Response({'message': 'No valid records found'})
 
-    def delete(self, request, *args, **kwargs):
-        room_order = get_object_or_404(RoomOrder, id=kwargs.get('pk'))
+        serializer = RoomOrderSerializer(data, many=True)
+        return Response(serializer.data)
 
-        if room_order is not None:
-            if request.user.id != room_order.user_id:
-                return JsonResponse({
-                    'message': "You don't enough hierarchy to do that!"
-                }, status = status.HTTP_400_BAD_REQUEST)
-            else:
-                room_order.delete()
+    def post(self, request):
+        data = request.data
+        start_time = datetime.strptime(
+            request.data['start_time'], '%Y/%m/%d %H:%M')
+        end_time = datetime.strptime(
+            request.data['end_time'], '%Y/%m/%d %H:%M')
+        print('>>>>>> start time: ',start_time)
+        if start_time > end_time or start_time < datetime.now():
+            return Response({'message': 'Input time invalid'}, status=status.HTTP_400_BAD_REQUEST)
 
-                return JsonResponse({
-                    'message': "Delete!"
-                }, status = status.HTTP_200_OK)
+        if start_time < (datetime.now() + timedelta(minutes=15)):
+            return Response({"message": 'Enter time 15 minutes from now'}, status=status.HTTP_400_BAD_REQUEST)
+        data['user_id'] = request.user.id
+        data['start_time'] = start_time
+        data['end_time'] = end_time
+        serializer = RoomOrderSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user_id=request.user.id)
+
+        return Response({'message': 'Record creation successful'}, status=status.HTTP_201_CREATED)
+
+    def put(self, request, pk=None):
+        if request.user.is_admin:
+            return Response({'message': 'Permission not granted'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            if RoomOrder.objects.filter(pk=pk).filter(user_id=request.user.id).count() <= 0:
+                return Response({'message': 'Objects do not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+            room_order = RoomOrder.objects.filter(
+                pk=pk).filter(user_id=request.user.id)
+            data = request.data
+
+            serializer = RoomOrderSerializer(room_order[0], data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response({'message': 'Object updated successfully'}, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk=None):
+        if request.user.is_admin:
+            return Response({'message': 'Permission not granted'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            if RoomOrder.objects.filter(pk=pk).filter(user_id=request.user.id).count() <= 0:
+                return Response({'message': 'Objects do not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+            room_order = RoomOrder.objects.filter(
+                pk=pk).filter(user_id=request.user.id)[0]
+            data = request.data
+
+            room_order.delete()
+
+            return Response({'message': 'Object deleted successfully'}, status=status.HTTP_200_OK)
 
 class OrderList(APIView):
     permission_classes = [IsAuthenticated]

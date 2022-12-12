@@ -5,6 +5,8 @@ import MyOrderView from '../views/MyOrderView.vue'
 import EditOrderView from '../views/EditOrderView.vue'
 import SpectateView from '../views/SpectateView'
 import TestView from '../views/TestView'
+import FaceRecognitionView from '../views/FaceRecognitionView'
+import InsertDatasetView from '../views/InsertDatasetView'
 
 const routes = [
   {
@@ -26,6 +28,14 @@ const routes = [
   {
     path: '/spectate',
     component: SpectateView
+  },
+  {
+    path: '/face',
+    component: FaceRecognitionView
+  },
+  {
+    path: '/insert',
+    component: InsertDatasetView
   },
   {
     path: '/test',

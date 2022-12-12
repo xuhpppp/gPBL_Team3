@@ -71,7 +71,8 @@ class UserLogin(APIView):
     def get(self, request):
         return JsonResponse({
             'full_name': request.user.full_name,
-            'is_admin': request.user.is_admin
+            'is_admin': request.user.is_admin,
+            'id': request.user.id
         }, status = status.HTTP_200_OK)
 
     def post(self, request):
@@ -86,7 +87,6 @@ class UserLogin(APIView):
 
             if user:
                 refresh = TokenObtainPairSerializer.get_token(user)
-                print('>>>>>>>>>>>>>>',user.id)
                 return JsonResponse({
                     'access_token': str(refresh.access_token),
                     'refresh_token': str(refresh),
