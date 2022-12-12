@@ -73,12 +73,13 @@ class OrderTask(APIView):
                     duplicate_flag = 1
                     break
                 else:
+                    
                     serializer.save()
-
             if duplicate_flag == 1:
                 return JsonResponse({
                     'message': 'There is also an order at this time in this room!'
                 }, status = status.HTTP_400_BAD_REQUEST)
+            
             
             return JsonResponse({
                 'message': 'Ordered successfully!'
@@ -87,3 +88,24 @@ class OrderTask(APIView):
             return JsonResponse({
                 'message': 'Something wrong!'
             }, status = status.HTTP_400_BAD_REQUEST)
+
+
+    def get(self,request,pk=None):
+        if pk==None:
+            if request.user.is_admin:
+                data = RoomOrder.objects.all()
+            else:
+                data = RoomOrder.objects.filter(user_id=request.user.id)
+        else:
+            if request.user.is_admin:
+                data = RoomOrder.objects.all()
+            else:
+                data = RoomOrder.objects.filter(user_id=request.user.id,pk=pk)
+        
+        if data==None:
+            return JsonResponse({
+                'message':'Objects do not exist or you do not have access'
+            })
+        else:
+            serializer = RoomOrderSerializer(data)
+            return JsonResponse(serializer.data)
