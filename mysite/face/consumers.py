@@ -227,7 +227,7 @@ class RecognizeConsumer(WebsocketConsumer):
         stop = 0
 
         # Open camera 
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(1)
         start = time.time_ns()
         frame_count = 0
         fps = -1
@@ -324,7 +324,7 @@ def capture_frame():
     global stop
     # for re-opening camera
     stop = 0
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
 
     count = 0
     while stop == 0:
