@@ -11,13 +11,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 import os
-
 from pathlib import Path
 
 from datetime import timedelta
 
 from django.conf import settings
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -37,6 +35,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,8 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'channels',
     'authen',
-    'room'
+    'room',
+    'stream',
+    'face',
+    'handle_detect_recognition'
 ]
 
 MIDDLEWARE = [
@@ -56,15 +59,20 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
+
+X_FRAME_OPTIONS = 'http://localhost:8080/'
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'mysite.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['mysite/templates'],
-        'APP_DIRS': True,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': False,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -77,6 +85,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'mysite.wsgi.application'
+# ASGI_APPLICATION = 'mysite.asgi.application'
 
 
 # Database
@@ -86,6 +95,15 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND':'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1',6379)]
+        }
     }
 }
 
@@ -118,7 +136,7 @@ TIME_ZONE = 'Asia/Ho_Chi_Minh'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -165,8 +183,9 @@ SIMPLE_JWT = {
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static')
-]
-
-MEDIA_URL = '/images/'
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static')
+# ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_URL = '/img/'
+MEDIA_ROOT = os.path.join(BASE_DIR,'static/face_detect')

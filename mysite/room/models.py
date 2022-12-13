@@ -10,7 +10,7 @@ class RoomOrder(models.Model):
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
 
-class StaffListOrder(models.Model):
-    id_RoomOrder = models.ForeignKey(RoomOrder, on_delete=models.CASCADE)
-    staff_email = models.CharField(max_length=255)
-    staff_full_name = models.CharField(max_length=255)
+class StaffOrder(models.Model):
+    roomOrder = models.ForeignKey(RoomOrder, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    joined = models.BooleanField(default=False)

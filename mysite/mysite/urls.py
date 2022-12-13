@@ -15,9 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from mysite import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('authen/', include('authen.urls')),
-    path('room/', include('room.urls'))
-]
+    path('room/', include('room.urls')),
+    path('face/', include('face.urls')),
+    path('recog/', include('handle_detect_recognition.urls'))
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
