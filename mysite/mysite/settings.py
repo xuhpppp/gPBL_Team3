@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'authen',
     'room',
-    'count',
     'face',
     'channels'
 ]
