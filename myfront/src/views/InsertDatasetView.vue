@@ -22,7 +22,7 @@ export default {
   data () {
     return {
       message: '',
-      time_left: 20,
+      time_left: 15,
       id: ''
     }
   },
@@ -96,7 +96,7 @@ export default {
               }
             })
 
-          self.time_left = 20
+          self.time_left = 15
         }
       }
     }

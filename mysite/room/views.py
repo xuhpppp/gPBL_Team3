@@ -52,9 +52,9 @@ class OrderTask(APIView):
                 }, status = status.HTTP_400_BAD_REQUEST)
 
             delta = start - now
-            if (delta.total_seconds() / 60) < 15:
+            if (delta.total_seconds() / 60) < 5:
                 return JsonResponse({
-                    'message': 'You must order the room before use 15 minutes'
+                    'message': 'You must order the room before use 5 minutes'
                 }, status = status.HTTP_400_BAD_REQUEST)
 
             list_of_RoomOrder = RoomOrder.objects.all().filter(room_name=mutable_data['room_name']).filter(start_time__gt=datetime.now())
@@ -132,7 +132,7 @@ class OrderTask(APIView):
                     }, status = status.HTTP_400_BAD_REQUEST)
 
                 delta = start - now
-                if (delta.total_seconds() / 60) < 15:
+                if (delta.total_seconds() / 60) < 5:
                     return JsonResponse({
                         'message': 'You must order the room before use 15 minutes'
                     }, status = status.HTTP_400_BAD_REQUEST)
