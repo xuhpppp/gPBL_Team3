@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
+    'humandetect'
 ]
 
 MIDDLEWARE = [
@@ -68,6 +70,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'countsite.wsgi.application'
+ASGI_APPLICATION = 'countsite.asgi.application'
 
 
 # Database

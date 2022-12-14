@@ -303,7 +303,18 @@ class StaffList(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        staff_list = StaffOrder.objects.all().filter(roomOrder=kwargs.get('pk')).select_related()
+        if kwargs.get('pk') is None:
+            order = RoomOrder.objects.all().filter(room_name='101').filter(start_time__lte=datetime.now()).filter(end_time__gte=datetime.now())
+            if (len(order)) == 0:
+                return JsonResponse({
+                    'staff_list': [],
+                    'staff_full_name': []
+                }, status = status.HTTP_200_OK)
+            else:
+                staff_list = StaffOrder.objects.all().filter(roomOrder=order[0].id).select_related()
+        else:
+            staff_list = StaffOrder.objects.all().filter(roomOrder=kwargs.get('pk')).select_related()
+
         serializer = StaffOrderSerializer(staff_list, many=True)
 
         staff_full_name = []

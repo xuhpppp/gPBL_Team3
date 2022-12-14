@@ -1,5 +1,5 @@
 """
-ASGI config for countsite project.
+ASGI config for mysite project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,16 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'countsite.settings')
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter
+from channels.routing import URLRouter
 
-application = get_asgi_application()
+from humandetect.routing import ws_urlpatterns
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
+
+application = ProtocolTypeRouter({
+    'http': get_asgi_application(),
+    'websocket': AuthMiddlewareStack(URLRouter(ws_urlpatterns))
+})
+
