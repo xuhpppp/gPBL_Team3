@@ -1,11 +1,6 @@
 <template>
-<<<<<<< HEAD
   <div class="login">
-    <img class="login-img" src="" alt="">
-=======
-    <div class="login">
-        <img class="login-img" src="../assets/admin.jpg" alt="">
->>>>>>> 97aedc8c25855e3e01475a340782dcbf10336a8e
+    <img class="login-img" src="../assets/admin.jpg" alt="">
 
     <div class="login-input">
       <h1 class="login-input-title">LOGIN</h1>

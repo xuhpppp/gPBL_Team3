@@ -50,7 +50,10 @@
     },
     "rules": {
       "no-unused-vars": "off",
-      "space-before-function-paren": "off"
+      "space-before-function-paren": "off",
+      "no-trailing-spaces": "off",
+      "eol-last": "off",
+      "no-multiple-empty-lines": "off"
     }
   }
 }

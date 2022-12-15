@@ -7,6 +7,9 @@ import SpectateView from '../views/SpectateView'
 import TestView from '../views/TestView'
 import FaceRecognitionView from '../views/FaceRecognitionView'
 import InsertDatasetView from '../views/InsertDatasetView'
+import AdminDashboard from '../views/AdminDashboard.vue'
+import Recognition from '../components/Version2/table/Recognition.vue'
+
 
 const routes = [
   {
@@ -40,11 +43,22 @@ const routes = [
   {
     path: '/test',
     component: TestView
+  },
+  {
+    path: '/admin',
+    component: AdminDashboard,
+    children: [
+      {
+        path: 'recognition',
+        component: Recognition
+      }
+    ]
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
+  linkActiveClass: 'active',
   routes
 })
 

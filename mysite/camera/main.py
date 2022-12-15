@@ -364,7 +364,7 @@ def analysis(db_path, model_name='VGG-Face', detector_backend='opencv', distance
                         data_save = {
                             "name":face_name,
                             "time": str(datetime.now().replace(microsecond=0)),
-                            "path": f"static/face_detect/{str(date.today())}/{face_name}_{str(datetime.now().timestamp())}.jpg"
+                            "path": f"{str(date.today())}/{face_name}_{str(datetime.now().timestamp())}.jpg"
                         }
                         append_data_json(data_save)
                         tic = time.time()  # in this way, freezed image can show 5 seconds

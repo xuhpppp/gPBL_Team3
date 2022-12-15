@@ -187,5 +187,5 @@ STATIC_URL = '/static/'
 #     os.path.join(BASE_DIR, 'static')
 # ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-MEDIA_URL = '/img/'
-MEDIA_ROOT = os.path.join(BASE_DIR,'static/face_detect')
+MEDIA_URL = '/image/'
+MEDIA_ROOT = os.path.join(BASE_DIR,'static/face_detect')    
