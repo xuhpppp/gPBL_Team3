@@ -10,17 +10,6 @@
       <p class="option-button-text">Spectate rooms</p>
     </a>
 
-<<<<<<< HEAD
-    <a class="option-button">
-      <font-awesome-icon class="option-button-icon" icon="fa-solid fa-calendar-check" />
-      <p class="option-button-text">Check-in</p>
-    </a>
-
-    <a class="option-button" v-if="isAdmin == true">
-      <font-awesome-icon class="option-button-icon" icon="fa-solid fa-user-plus" />
-      <p class="option-button-text">Register new user</p>
-    </a>
-=======
         <a class="option-button" href="/face">
             <font-awesome-icon class="option-button-icon" icon="fa-solid fa-calendar-check" />
             <p class="option-button-text">Check-in</p>
@@ -35,7 +24,6 @@
             <font-awesome-icon class="option-button-icon" icon="fa-solid fa-user-plus" />
             <p class="option-button-text">Register new user</p>
         </a>
->>>>>>> adc8a81850984bcdd65eb1143f4183a3c2ca8c72
 
     <a class="option-button">
       <font-awesome-icon class="option-button-icon" icon="fa-solid fa-key" />

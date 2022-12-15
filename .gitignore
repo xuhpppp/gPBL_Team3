@@ -27,3 +27,6 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+mysite/static/face_detect/*
+mysite/data_recognition/*

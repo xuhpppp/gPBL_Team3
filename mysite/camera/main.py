@@ -17,8 +17,8 @@ import json
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 BASE_DIR = str(Path(__file__).resolve().parent.parent)
-path_img_save = f'{BASE_DIR}/static/face_detect/{str(date.today())}'
-path_json_save = f'{BASE_DIR}/data_recognition/{str(date.today())}.json'
+path_img_save = f'{BASE_DIR}\\static\\face_detect\\{str(date.today())}'
+path_json_save = f'{BASE_DIR}\\data_recognition\\{str(date.today())}.json'
 if not os.path.exists(path_img_save):
     os.makedirs(path_img_save)
 if not os.path.exists(path_json_save):
@@ -60,7 +60,7 @@ def analysis(db_path, model_name='VGG-Face', detector_backend='opencv', distance
             for file in f:
                 if ('.jpg' in file):
                     # exact_path = os.path.join(r, file)
-                    exact_path = r + "/" + file
+                    exact_path = r + "\\" + file
                     # print(exact_path)
                     employees.append(exact_path)
 
@@ -270,7 +270,7 @@ def analysis(db_path, model_name='VGG-Face', detector_backend='opencv', distance
                                     label = employee_name.split(
                                         "/")[-1].replace(".jpg", "")
                                     label = re.sub('[0-9]', '', label)
-                                    face_name = employee_name.split("/")[-2]
+                                    face_name = employee_name.split("\\")[-2]
 
                                     try:
                                         if y - pivot_img_size > 0 and x + w + pivot_img_size < resolution_x:
@@ -363,7 +363,7 @@ def analysis(db_path, model_name='VGG-Face', detector_backend='opencv', distance
                             filename=f"{path_img_save}/{face_name}_{str(datetime.now().timestamp())}.jpg", img=face_save)
                         data_save = {
                             "name":face_name,
-                            "time": str(datetime.now()),
+                            "time": str(datetime.now().replace(microsecond=0)),
                             "path": f"static/face_detect/{str(date.today())}/{face_name}_{str(datetime.now().timestamp())}.jpg"
                         }
                         append_data_json(data_save)
@@ -399,4 +399,4 @@ def analysis(db_path, model_name='VGG-Face', detector_backend='opencv', distance
 
 
 if __name__ == '__main__':
-    analysis(db_path=f'{BASE_DIR}/static/datasets', time_threshold=2)
+    analysis(db_path=f'{BASE_DIR}\\static\\datasets', time_threshold=2)
