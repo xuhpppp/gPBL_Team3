@@ -359,12 +359,14 @@ def analysis(db_path, model_name='VGG-Face', detector_backend='opencv', distance
                                     except Exception as err:
                                         print(str(err))
 
+
+                        path_file_save = f"{face_name}_{str(datetime.now().timestamp())}.jpg"
                         cv2.imwrite(
-                            filename=f"{path_img_save}/{face_name}_{str(datetime.now().timestamp())}.jpg", img=face_save)
+                            filename=f"{path_img_save}/{path_file_save}", img=face_save)
                         data_save = {
                             "name":face_name,
                             "time": str(datetime.now().replace(microsecond=0)),
-                            "path": f"{str(date.today())}/{face_name}_{str(datetime.now().timestamp())}.jpg"
+                            "path": f"{str(date.today())}\\{path_file_save}"
                         }
                         append_data_json(data_save)
                         tic = time.time()  # in this way, freezed image can show 5 seconds

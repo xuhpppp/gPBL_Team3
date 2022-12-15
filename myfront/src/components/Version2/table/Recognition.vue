@@ -17,7 +17,7 @@
               <th scope="row">{{ index }}</th>
               <td>{{ item.name }}</td>
               <td>{{ item.time }}</td>
-              <td><img :src="api_url + '/image/' + item.path" alt=""></td>
+              <td><img :src="api_url + '/image/' + item.path" :style="style_img" alt=""></td>
             </tr>
           </tbody>
         </table>
@@ -40,7 +40,7 @@
               <th scope="row">{{ index }}</th>
               <td>{{ item.name }}</td>
               <td>{{ item.time }}</td>
-              <td><img :src="api_url + '/image/' + item.path" alt=""></td>
+              <td><img :src="api_url + '/image/' + item.path" :style="style_img" alt=""></td>
             </tr>
           </tbody>
         </table>
@@ -63,7 +63,7 @@
               <th scope="row">{{ index }}</th>
               <td>{{ item.name }}</td>
               <td>{{ item.time }}</td>
-              <td><img :src="api_url + '/image/' + item.path" alt=""></td>
+              <td><img :src="api_url + '/image/' + item.path" :style="style_img" alt=""></td>
             </tr>
           </tbody>
         </table>
@@ -81,7 +81,11 @@ export default {
       face_pass: [],
       face_not_shift: [],
       face_unknow: [],
-      api_url: commons.API_URL
+      api_url: commons.API_URL,
+      style_img: {
+        width: '70px',
+        height: '70px'
+      }
     }
   },
 
